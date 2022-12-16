@@ -3,46 +3,59 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
+using static ChessRules;
+using static ChessInfo;
 
 // chess x = a-h, y = 1-8
 public class BoardManager : MonoBehaviour
 {
-    public List<Piece> p1Pieces;
-    public List<Piece> p2Pieces;
+    public List<Piece> pieces;
+    // public List<Piece> p2Pieces;
 
     private float _screenWidth;
     private const float TOLERANCE = 0.1f;
-    private Rect _pieceBounds = Rect.zero;
-    private float xMax;
-    private float yMax;
-    private float xMin;
-    private float yMin;
+    // private Rect _pieceBounds = Rect.zero;
+    private float _xMax;
+    private float _yMax;
+    private float _xMin;
+    private float _yMin;
     private float _dx = 1;
     private float _dy = 1;
-    private ChessInfo.PieceColor _turn = ChessInfo.PieceColor.WHITE;
+    private PieceColor _turn = PieceColor.WHITE;
 
+    
 
     private void GetPieceGridBounds()
     {
-        xMax = xMin = 0;
-        foreach (var p in p1Pieces.Select(piece => piece.transform.position))
+        _xMax = _xMin = 0;
+        foreach (var p in pieces.Select(piece => piece.transform.position))
         {
-            if (p.x > xMax)
-                xMax = p.x;
-            if (p.x < xMin)
-                xMin = p.x;
+            if (p.x > _xMax)
+                _xMax = p.x;
+            if (p.x < _xMin)
+                _xMin = p.x;
         }
 
-        _dx = (xMax - xMin) / 7;
+        _dx = (_xMax - _xMin) / 7;
         _dy = _dx;
-        Debug.Log($"BOUNDS_UPDATE: {xMin}=>{xMax} dx={_dx}");
+        Debug.Log($"BOUNDS_UPDATE: {_xMin}=>{_xMax} dx={_dx}");
     }
 
-    private Vector2Int GetGridPosition(Vector3 pos)
-    {
-        return new Vector2Int((int) ((_pieceBounds.xMax + pos.x) / _dx), (int) ((_pieceBounds.yMax + pos.y) / _dy));
-    }
+    // private Vector2Int GetGridPosition(Vector3 pos)
+    // {
+    //     return new Vector2Int((int) ((_pieceBounds.xMax + pos.x) / _dx), (int) ((_pieceBounds.yMax + pos.y) / _dy));
+    // }
 
+    // private void UpdatePiecesFromBoard(Piece[,] board)
+    // {
+    //     for (var i = 1; i <= 8; i++)
+    //     {
+    //         for (var j = 1; j <= 8; j++)
+    //         {
+    //         }
+    //     }
+    //     
+    // }
 
     // Update is called once per frame
     void Update()
@@ -53,21 +66,21 @@ public class BoardManager : MonoBehaviour
             _screenWidth = Screen.width;
         }
 
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            GetPieceGridBounds();
-            if (_turn == ChessInfo.PieceColor.WHITE)
-            {
-                var randomPiece = p1Pieces.ElementAt(Random.Range(0, p1Pieces.Count));
-                randomPiece.transform.Translate(0, _dy, 0);
-                _turn = ChessInfo.PieceColor.BLACK;
-            }
-            else
-            {
-                var randomPiece = p2Pieces.ElementAt(Random.Range(0, p2Pieces.Count));
-                randomPiece.transform.Translate(0, -_dy, 0);
-                _turn = ChessInfo.PieceColor.WHITE;
-            }
-        }
+        // if (Input.GetKeyUp(KeyCode.Space))
+        // {
+        //     GetPieceGridBounds();
+        //     if (_turn == PieceColor.WHITE)
+        //     {
+        //         var randomPiece = p1Pieces.ElementAt(Random.Range(0, p1Pieces.Count));
+        //         randomPiece.transform.Translate(0, _dy, 0);
+        //         _turn = PieceColor.BLACK;
+        //     }
+        //     else
+        //     {
+        //         var randomPiece = p2Pieces.ElementAt(Random.Range(0, p2Pieces.Count));
+        //         randomPiece.transform.Translate(0, -_dy, 0);
+        //         _turn = PieceColor.WHITE;
+        //     }
+        // }
     }
 }

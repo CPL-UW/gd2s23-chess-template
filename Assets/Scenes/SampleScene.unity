@@ -2242,7 +2242,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89e38273903234a7982fc6139154ae26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  p1Pieces:
+  pieces:
+  - {fileID: 1428873476}
+  - {fileID: 1643323745}
+  - {fileID: 1702180168}
+  - {fileID: 480455156}
+  - {fileID: 166175060}
+  - {fileID: 530175026}
+  - {fileID: 770385789}
+  - {fileID: 1249621147}
   - {fileID: 1991776965}
   - {fileID: 1997617465}
   - {fileID: 1643698543}
@@ -2259,15 +2267,6 @@ MonoBehaviour:
   - {fileID: 1440042129}
   - {fileID: 1043548392}
   - {fileID: 2081663538}
-  p2Pieces:
-  - {fileID: 1428873476}
-  - {fileID: 1643323745}
-  - {fileID: 1702180168}
-  - {fileID: 480455156}
-  - {fileID: 166175060}
-  - {fileID: 530175026}
-  - {fileID: 770385789}
-  - {fileID: 1249621147}
   - {fileID: 618854006}
   - {fileID: 353237382}
   - {fileID: 1647092105}
