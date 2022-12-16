@@ -12,7 +12,12 @@ public class Piece : MonoBehaviour
     public int cx;
     public int cy;
     public int pieceID;
-    
+
+    public void SetXY(int x, int y)
+    {
+        cx = x; cy = y;
+    }
+
     void Start()
     {
         name = $"{pieceColor}_{pieceType}_{cx}_{cy}";

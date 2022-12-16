@@ -28,34 +28,44 @@ public class BoardManager : MonoBehaviour
     private void GetPieceGridBounds()
     {
         _xMax = _xMin = 0;
+        _yMax = _yMin = 0;
         foreach (var p in pieces.Select(piece => piece.transform.position))
         {
             if (p.x > _xMax)
                 _xMax = p.x;
             if (p.x < _xMin)
                 _xMin = p.x;
+            if (p.y > _yMax)
+                _yMax = p.y;
+            if (p.y < _yMin)
+                _yMin = p.y;
         }
 
         _dx = (_xMax - _xMin) / 7;
-        _dy = _dx;
+        _dy = (_yMax - _yMin) / 7;
         Debug.Log($"BOUNDS_UPDATE: {_xMin}=>{_xMax} dx={_dx}");
     }
 
-    // private Vector2Int GetGridPosition(Vector3 pos)
-    // {
-    //     return new Vector2Int((int) ((_pieceBounds.xMax + pos.x) / _dx), (int) ((_pieceBounds.yMax + pos.y) / _dy));
-    // }
-
-    // private void UpdatePiecesFromBoard(Piece[,] board)
-    // {
-    //     for (var i = 1; i <= 8; i++)
-    //     {
-    //         for (var j = 1; j <= 8; j++)
-    //         {
-    //         }
-    //     }
-    //     
-    // }
+    private float cx2tx(int cx)
+    {
+        return _xMin + (cx - 1) * _dx;
+    }
+    
+    private float cy2ty(int cy)
+    {
+        return _yMin + (cy - 1) * _dy;
+    }
+    
+    private void UpdatePieceLocations()
+    {
+        foreach (var piece in pieces)
+        {
+            var x = cx2tx(piece.cx);
+            var y = cy2ty(piece.cy);
+            piece.transform.position = new Vector3(x, y, 0);
+        }
+    }
+    
 
     // Update is called once per frame
     void Update()
@@ -66,7 +76,22 @@ public class BoardManager : MonoBehaviour
             _screenWidth = Screen.width;
         }
 
-        // if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            GetPieceGridBounds();
+
+            var turnPieces = pieces.Where(piece => piece.pieceColor == _turn);
+            var randomPiece = turnPieces.ElementAt(Random.Range(0, turnPieces.Count()));
+            var dcy = _turn == PieceColor.WHITE ? 1 : -1;
+            MoveOnePiece(ref pieces, randomPiece, 0, dcy);
+            _turn = _turn switch
+            {
+                PieceColor.WHITE => PieceColor.BLACK,
+                _ => PieceColor.WHITE
+            };
+
+            UpdatePieceLocations();
+        }
         // {
         //     GetPieceGridBounds();
         //     if (_turn == PieceColor.WHITE)

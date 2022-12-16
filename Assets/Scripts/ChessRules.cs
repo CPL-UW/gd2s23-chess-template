@@ -26,6 +26,28 @@ public static class ChessRules
         }
         return board;
     }
+
+    private static bool ValidXY(int x, int y)
+    {
+        return x is >= 1 and <= 8 && y is >= 1 and <= 8;
+    }
+    
+    public static Piece[,] MovePiece(Piece[,] board, int startX, int startY, int targetX, int targetY)
+    {
+        if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return board;
+        if (null != board[targetX, targetY])
+            board[targetX, targetY].SetXY(startX, startY);
+        if (null != board[startX, startY])
+            board[startX, startY].SetXY(targetX, targetY);
+        (board[startX, startY], board[targetX, targetY]) = (board[targetX, targetY], board[startX, startY]);
+        return board;
+    }
+
+    public static void MoveOnePiece(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    {
+        MovePiece(GetBoard(pieces), pieceToMove.cx, pieceToMove.cy, pieceToMove.cx + dcx, pieceToMove.cy + dcy);
+    }
+    
     //
     // public static PieceInfo[,] MovePiece(PieceInfo[,] board, int startX, int startY, int targetX, int targetY)
     // {
