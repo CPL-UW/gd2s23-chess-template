@@ -17,6 +17,23 @@ public static class ChessInfo
     {
         NONE, BLACK, WHITE
     }
+
+    public class PieceMove
+    {
+        public int x;
+        public int y;
+
+        public PieceMove(int cx, int cy)
+        {
+            x = cx;
+            y = cy;
+        }
+
+        public bool NotZero()
+        {
+            return 0 != x || 0 != y;
+        }
+    }
     
     // public enum CX { NONE, A, B, C, D, E, F, G, H }
     // public enum CY { NONE, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT }

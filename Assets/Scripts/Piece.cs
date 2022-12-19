@@ -13,6 +13,16 @@ public class Piece : MonoBehaviour
     public int cy;
     public int pieceID;
 
+    public Piece(Piece other)
+    {
+        
+        pieceType = other.pieceType;
+        pieceColor = other.pieceColor;
+        pieceState = other.pieceState;
+        cx = other.cx;
+        cy = other.cy;
+    }
+
     public void SetXY(int x, int y)
     {
         cx = x; cy = y;

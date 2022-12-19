@@ -81,9 +81,15 @@ public class BoardManager : MonoBehaviour
             GetPieceGridBounds();
 
             var turnPieces = pieces.Where(piece => piece.pieceColor == _turn);
+            
             var randomPiece = turnPieces.ElementAt(Random.Range(0, turnPieces.Count()));
-            var dcy = _turn == PieceColor.WHITE ? 1 : -1;
-            MoveOnePiece(ref pieces, randomPiece, 0, dcy);
+            var bestMove = BestMove(pieces, randomPiece);
+            // var dcy = _turn == PieceColor.WHITE ? 1 : -1;
+            if (bestMove != null && bestMove.NotZero())
+            {
+                MoveOnePiece(ref pieces, randomPiece, bestMove.x, bestMove.y);
+            }
+
             _turn = _turn switch
             {
                 PieceColor.WHITE => PieceColor.BLACK,
