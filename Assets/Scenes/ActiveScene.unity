@@ -706,7 +706,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -2275,6 +2275,7 @@ MonoBehaviour:
   - {fileID: 2143244799}
   - {fileID: 2111402318}
   - {fileID: 789491287}
+  ticksPerMove: 10
 --- !u!114 &1249621147 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3851526639306844263, guid: b75fb2e9e7fc14067bd65b1c91a5c981, type: 3}

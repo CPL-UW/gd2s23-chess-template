@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static ChessInfo;
 
 public class Piece : MonoBehaviour
 {
@@ -28,10 +29,17 @@ public class Piece : MonoBehaviour
         cx = x; cy = y;
     }
 
+    public void RemoveSelf()
+    {
+        if (pieceState != PieceState.ALIVE) return;
+        pieceState = PieceState.DEAD;
+        GetComponent<Renderer>().enabled = false;
+    }
+    
     void Start()
     {
         name = $"{pieceColor}_{pieceType}_{cx}_{cy}";
-        pieceState = ChessInfo.PieceState.ALIVE;
+        pieceState = PieceState.ALIVE;
         pieceID = Random.Range(10000000, 100000000);
     }
 

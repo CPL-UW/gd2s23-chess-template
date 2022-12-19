@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static ChessInfo;
+using Random = UnityEngine.Random;
 
 public static class ChessRules 
 {
@@ -18,10 +21,11 @@ public static class ChessRules
         return board;
     }
     
-    public static Piece[,] GetBoard(List<Piece> pieces)
+    private static Piece[,] GetBoard(IEnumerable<Piece> pieces)
     {
         var board = BlankBoard();
-        foreach (var piece in pieces)
+        var livePieces = pieces.Where(piece => piece.pieceState == PieceState.ALIVE);
+        foreach (var piece in livePieces)
         {
             board[piece.cx, piece.cy] = piece;
         }
@@ -42,19 +46,20 @@ public static class ChessRules
     {
         return x is >= 1 and <= 8 && y is >= 1 and <= 8;
     }
-    
-    public static Piece[,] MovePiece(Piece[,] board, int startX, int startY, int targetX, int targetY)
+
+    private static void MovePiece(Piece[,] board, int startX, int startY, int targetX, int targetY)
     {
-        if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return board;
+        if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return;
+        if (board[startX, startY] == null) return;
         if (null != board[targetX, targetY])
-            board[targetX, targetY].SetXY(startX, startY);
-        if (null != board[startX, startY])
-            board[startX, startY].SetXY(targetX, targetY);
-        (board[startX, startY], board[targetX, targetY]) = (board[targetX, targetY], board[startX, startY]);
-        return board;
+        {
+            board[targetX, targetY].RemoveSelf();
+        }
+        board[startX, startY].SetXY(targetX, targetY);
+        board[targetX, targetY] = board[startX, startY];
     }
 
-    public static void MoveOnePiece(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    public static void MoveOnePiece(List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
     {
         var board = GetBoard(pieces);
         if (CheckValidMove(board,pieceToMove,dcx,dcy))
@@ -65,28 +70,27 @@ public static class ChessRules
         }
     }
 
+    public static void DoMove(List<Piece> pieces, Piece pieceToMove, PieceMove move)
+    {
+        
+    }
+    
     private static bool RulePawn(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
         var validYDir = pieceToMove.pieceColor == PieceColor.WHITE ? 1 : -1;
         if (0 == dcx && dcy == validYDir && null == board[pieceToMove.cx, pieceToMove.cy + dcy])
             return true;
-        if (1 == Mathf.Abs(dcx) && dcy == validYDir)
-        {
-            var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
-            if (null != targetPiece && targetPiece.pieceColor != pieceToMove.pieceColor)
-                return true;
-        }
-        return false;
+        if (1 != Mathf.Abs(dcx) || dcy != validYDir) return false;
+        var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
+        return null != targetPiece && targetPiece.pieceColor != pieceToMove.pieceColor;
     }
 
     private static bool RuleKing(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
-        if (Mathf.Abs(dcx) <= 1 && Mathf.Abs(dcy) <= 1)
-        {
-            var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
-            if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
-                return true;
-        }
+        if (Mathf.Abs(dcx) > 1 || Mathf.Abs(dcy) > 1) return false;
+        var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
+        if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
+            return true;
         return false;
     }
     
@@ -97,60 +101,50 @@ public static class ChessRules
     
     private static bool RuleRook(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
-        if (0 == dcx && 0 != dcy)
+        // only move in the x or y direction
+        if ((0 != dcx || 0 == dcy) && (0 != dcy || 0 == dcx)) return false;
+        
+        // cannot be anyone on the way there
+        var yDir = dcy != 0 ? dcy / Mathf.Abs(dcy) : 0;
+        var xDir = dcx != 0 ? dcx / Mathf.Abs(dcx) : 0;
+        for (int x = pieceToMove.cx + xDir, y = pieceToMove.cy + yDir; 
+                 x != pieceToMove.cx + dcx && y != pieceToMove.cy + dcy; 
+                 x += xDir, y += yDir)
         {
-            var yDir = dcy / Mathf.Abs(dcy);
-            for (var y = pieceToMove.cy + yDir; y != pieceToMove.cy + dcy; y += yDir)
-            {
-                if (null != board[pieceToMove.cx, y])
-                    return false;
-            }
-            var targetPiece = board[pieceToMove.cx, pieceToMove.cy + dcy];
-            if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
-                return true;
+            if (null != board[x, y])
+                return false;
         }
-        else if (0 == dcy && 0 != dcx)
-        {
-            var xDir = dcx / Mathf.Abs(dcx);
-            for (var x = pieceToMove.cx + xDir; x != pieceToMove.cx + dcx; x += xDir)
-            {
-                if (null != board[x, pieceToMove.cy])
-                    return false;
-            }
-            var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy];
-            if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
-                return true;
-        }
+        
+        // if the way was clean, check the target
+        var targetPiece = board[pieceToMove.cx, pieceToMove.cy + dcy];
+        if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
+            return true;
         return false;
     }
     
     private static bool RuleBishop(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
-        if (dcx != 0 && Mathf.Abs(dcx) == Mathf.Abs(dcy))
+        // only move diagonal
+        if (dcx == 0 || Mathf.Abs(dcx) != Mathf.Abs(dcy)) return false;
+        
+        // cannot be anyone on the way there
+        var yDir = dcy != 0 ? dcy / Mathf.Abs(dcy) : 0;
+        var xDir = dcx / Mathf.Abs(dcx);
+        for (int x = pieceToMove.cx + xDir, y = pieceToMove.cy + yDir; x != pieceToMove.cx + dcx; x += xDir, y += yDir)
         {
-            var xDir = dcx / Mathf.Abs(dcx);
-            var yDir = dcy / Mathf.Abs(dcy);
-            for (int x = pieceToMove.cx + xDir, y = pieceToMove.cy + yDir; x != pieceToMove.cx + dcx; x += xDir, y += yDir)
-            {
-                if (null != board[x, y])
-                    return false;
-            }
-            var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
-            if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
-                return true;
+            if (null != board[x, y]) 
+                return false;
         }
-        return false;
+        
+        // if the way was clean, check the target
+        var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
+        return null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor;
     }
     
     private static bool RuleKnight(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
-        if (Mathf.Abs(dcx) == 2 && Mathf.Abs(dcy) == 1)
-        {
-            var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
-            if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
-                return true;
-        }
-        else if (Mathf.Abs(dcx) == 1 && Mathf.Abs(dcy) == 2)
+        if ((Mathf.Abs(dcx) == 2 && Mathf.Abs(dcy) == 1) || 
+            (Mathf.Abs(dcx) == 1 && Mathf.Abs(dcy) == 2))
         {
             var targetPiece = board[pieceToMove.cx + dcx, pieceToMove.cy + dcy];
             if (null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor)
@@ -173,16 +167,16 @@ public static class ChessRules
             _ => false
         };
     }
-    
-    public static bool CheckValidMove(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
+
+    private static bool CheckValidMove(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
         if (null == pieceToMove || 
             !ValidXY(pieceToMove.cx,pieceToMove.cy) || 
             !ValidXY(pieceToMove.cx + dcx, pieceToMove.cy + dcy)) return false;
         return CheckPieceRules(board, pieceToMove, dcx, dcy);
     }
-    
-    public static List<PieceMove> GetValidMoves(Piece[,] board, Piece pieceToMove)
+
+    private static IEnumerable<PieceMove> GetValidMoves(Piece[,] board, Piece pieceToMove)
     {
         var validMoves = new List<PieceMove>();
         for (var dx = -7; dx <= 7; dx++)
@@ -191,7 +185,7 @@ public static class ChessRules
             {
                 if (CheckValidMove(board, pieceToMove, dx, dy))
                 {
-                    validMoves.Add(new PieceMove(dx, dy));
+                    validMoves.Add(new PieceMove(pieceToMove, dx, dy));
                 }
             }
         }
@@ -199,9 +193,14 @@ public static class ChessRules
     }
     
     
-    public static PieceMove BestMove(List<Piece> pieces, Piece pieceToMove)
+    public static PieceMove BestMove(List<Piece> pieces)
     {
-        var validMoves = GetValidMoves(GetBoard(pieces), pieceToMove);
+        var board = GetBoard(pieces);
+        var validMoves = new List<PieceMove>();
+        foreach (var piece in pieces)
+        {
+            validMoves.AddRange(GetValidMoves(board, piece));
+        }
         return validMoves.Count == 0 ? null : validMoves[Random.Range(0, validMoves.Count)];
     }
     

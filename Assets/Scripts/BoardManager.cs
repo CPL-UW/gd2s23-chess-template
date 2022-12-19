@@ -22,7 +22,8 @@ public class BoardManager : MonoBehaviour
     private float _dx = 1;
     private float _dy = 1;
     private PieceColor _turn = PieceColor.WHITE;
-
+    private int _ticksSinceLastMove = 0;
+    public int ticksPerMove = 10; 
     
 
     private void GetPieceGridBounds()
@@ -60,10 +61,56 @@ public class BoardManager : MonoBehaviour
     {
         foreach (var piece in pieces)
         {
-            var x = cx2tx(piece.cx);
-            var y = cy2ty(piece.cy);
-            piece.transform.position = new Vector3(x, y, 0);
+            if (piece.cx < 1 || piece.cy < 1 || piece.pieceState == PieceState.DEAD)
+            {
+                piece.RemoveSelf();
+            }
+            else
+            {
+                var x = cx2tx(piece.cx);
+                var y = cy2ty(piece.cy);
+                piece.transform.position = new Vector3(x, y, 0);
+            }
         }
+    }
+
+    private void DoRandomBoardMove()
+    {
+        
+        var turnPieces = pieces.Where(piece => piece.pieceState == PieceState.ALIVE && piece.pieceColor == _turn).ToList();
+        if (turnPieces.Any())
+        {
+            // var randomPiece = turnPieces.ElementAt(Random.Range(0, turnPieces.Count()));
+            var bestMove = BestMove(turnPieces);
+            if (bestMove != null && bestMove.NotZero())
+            {
+                MoveOnePiece(turnPieces, bestMove.piece, bestMove.x, bestMove.y);
+            }
+        }
+        else
+        {
+            Debug.Log($"No pieces for {_turn}");
+        }
+
+        EndTurn();
+    }
+
+    private void EndTurn()
+    {
+        _turn = _turn switch
+        {
+            PieceColor.WHITE => PieceColor.BLACK,
+            _ => PieceColor.WHITE
+        };
+
+        UpdatePieceLocations();
+    }
+
+    void FixedUpdate()
+    {
+        if (++_ticksSinceLastMove % ticksPerMove != 0) return;
+        DoRandomBoardMove();
+        _ticksSinceLastMove = 0;
     }
     
 
@@ -79,39 +126,7 @@ public class BoardManager : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space))
         {
             GetPieceGridBounds();
-
-            var turnPieces = pieces.Where(piece => piece.pieceColor == _turn);
-            
-            var randomPiece = turnPieces.ElementAt(Random.Range(0, turnPieces.Count()));
-            var bestMove = BestMove(pieces, randomPiece);
-            // var dcy = _turn == PieceColor.WHITE ? 1 : -1;
-            if (bestMove != null && bestMove.NotZero())
-            {
-                MoveOnePiece(ref pieces, randomPiece, bestMove.x, bestMove.y);
-            }
-
-            _turn = _turn switch
-            {
-                PieceColor.WHITE => PieceColor.BLACK,
-                _ => PieceColor.WHITE
-            };
-
-            UpdatePieceLocations();
+            DoRandomBoardMove();
         }
-        // {
-        //     GetPieceGridBounds();
-        //     if (_turn == PieceColor.WHITE)
-        //     {
-        //         var randomPiece = p1Pieces.ElementAt(Random.Range(0, p1Pieces.Count));
-        //         randomPiece.transform.Translate(0, _dy, 0);
-        //         _turn = PieceColor.BLACK;
-        //     }
-        //     else
-        //     {
-        //         var randomPiece = p2Pieces.ElementAt(Random.Range(0, p2Pieces.Count));
-        //         randomPiece.transform.Translate(0, -_dy, 0);
-        //         _turn = PieceColor.WHITE;
-        //     }
-        // }
     }
 }

@@ -22,9 +22,11 @@ public static class ChessInfo
     {
         public int x;
         public int y;
+        public Piece piece = null;
 
-        public PieceMove(int cx, int cy)
+        public PieceMove(Piece curPiece, int cx, int cy)
         {
+            piece = curPiece;
             x = cx;
             y = cy;
         }
