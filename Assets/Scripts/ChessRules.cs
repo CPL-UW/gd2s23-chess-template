@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using static ChessInfo;
 using Random = UnityEngine.Random;
@@ -32,48 +33,78 @@ public static class ChessRules
         return board;
     }
 
-    public static Piece[,] CopyBoard(List<Piece> pieces)
-    {
-        var board = BlankBoard();
-        foreach (var piece in pieces)
-        {
-            board[piece.cx, piece.cy] = new(piece);
-        }
-        return board;
-    }
+    // public static Piece[,] CopyBoard(List<Piece> pieces)
+    // {
+    //     var board = BlankBoard();
+    //     foreach (var piece in pieces)
+    //     {
+    //         board[piece.cx, piece.cy] = new(piece);
+    //     }
+    //     return board;
+    // }
     
     private static bool ValidXY(int x, int y)
     {
         return x is >= 1 and <= 8 && y is >= 1 and <= 8;
     }
 
-    private static void MovePiece(Piece[,] board, int startX, int startY, int targetX, int targetY)
+    // private static void MovePiece(Piece[,] board, int startX, int startY, int targetX, int targetY)
+    // {
+    //     if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return;
+    //     var movingPiece = board[startX, startY];
+    //     if (movingPiece == null) return;
+    //     var targetPiece = board[targetX, targetY];
+    //     if (null != targetPiece)
+    //     {
+    //         targetPiece.RemoveSelf();
+    //     }
+    //     movingPiece.SetXY(targetX, targetY);
+    // }
+
+    private static bool MovePiece(List<Piece> pieces, int startX, int startY, int targetX, int targetY)
     {
-        if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return;
-        if (board[startX, startY] == null) return;
-        if (null != board[targetX, targetY])
+        if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return false;
+        var movingPiece = pieces.Find(piece => piece.cx == startX && piece.cy == startY);
+        if (movingPiece == null)
         {
-            board[targetX, targetY].RemoveSelf();
+            Debug.Log("Moving piece is null");
+            return false;
         }
-        board[startX, startY].SetXY(targetX, targetY);
-        board[targetX, targetY] = board[startX, startY];
+        var targetPiece = pieces.Find(piece => piece.cx == targetX && piece.cy == targetY);
+        if (null != targetPiece)
+        {
+            Debug.Log($"REMOVING {targetPiece}");
+            targetPiece.RemoveSelf();
+        }
+        else
+        {
+            // TODO CLEAR DUP BUG!!
+            Debug.Log(pieces.Aggregate("L: ", (output, next) => $"{output}, ({next.cx},{next.cy})"));
+        }
+        movingPiece.SetXY(targetX, targetY);
+        return true;
     }
 
     public static void MoveOnePiece(List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
     {
         var board = GetBoard(pieces);
         if (CheckValidMove(board,pieceToMove,dcx,dcy))
-            MovePiece(board, pieceToMove.cx, pieceToMove.cy, pieceToMove.cx + dcx, pieceToMove.cy + dcy);
+        {
+            if (MovePiece(pieces, pieceToMove.cx, pieceToMove.cy, pieceToMove.cx + dcx, pieceToMove.cy + dcy))
+            {
+                // Debug.Log($"SUCCESS {pieceToMove.cx},{pieceToMove.cy} to {pieceToMove.cx + dcx},{pieceToMove.cy + dcy}");
+            }
+            else
+            {
+                Debug.Log($"FAIL {pieceToMove.cx},{pieceToMove.cy} to {pieceToMove.cx + dcx},{pieceToMove.cy + dcy}");
+            }
+        }
         else
         {
             Debug.Log($"Invalid Move: {pieceToMove.pieceType} ({pieceToMove.cx},{pieceToMove.cy}) to ({pieceToMove.cx + dcx},{pieceToMove.cy + dcy})");
         }
     }
-
-    public static void DoMove(List<Piece> pieces, Piece pieceToMove, PieceMove move)
-    {
-        
-    }
+    
     
     private static bool RulePawn(Piece[,] board, Piece pieceToMove, int dcx, int dcy)
     {
@@ -172,7 +203,8 @@ public static class ChessRules
     {
         if (null == pieceToMove || 
             !ValidXY(pieceToMove.cx,pieceToMove.cy) || 
-            !ValidXY(pieceToMove.cx + dcx, pieceToMove.cy + dcy)) return false;
+            !ValidXY(pieceToMove.cx + dcx, pieceToMove.cy + dcy)) 
+            return false;
         return CheckPieceRules(board, pieceToMove, dcx, dcy);
     }
 

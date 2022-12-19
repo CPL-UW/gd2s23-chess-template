@@ -5,24 +5,22 @@ using static ChessInfo;
 
 public class Piece : MonoBehaviour
 {
-    public ChessInfo.PieceType pieceType = ChessInfo.PieceType.NONE;
-    public ChessInfo.PieceColor pieceColor = ChessInfo.PieceColor.NONE;
-    public ChessInfo.PieceState pieceState = ChessInfo.PieceState.NONE;
-    // public ChessInfo.CX cx = ChessInfo.CX.NONE;
-    // public ChessInfo.CY cy = ChessInfo.CY.NONE;
+    public PieceType pieceType;
+    public PieceColor pieceColor;
+    public PieceState pieceState;
     public int cx;
     public int cy;
     public int pieceID;
 
-    public Piece(Piece other)
-    {
-        
-        pieceType = other.pieceType;
-        pieceColor = other.pieceColor;
-        pieceState = other.pieceState;
-        cx = other.cx;
-        cy = other.cy;
-    }
+    // public Piece(Piece other)
+    // {
+    //     
+    //     pieceType = other.pieceType;
+    //     pieceColor = other.pieceColor;
+    //     pieceState = other.pieceState;
+    //     cx = other.cx;
+    //     cy = other.cy;
+    // }
 
     public void SetXY(int x, int y)
     {
@@ -31,9 +29,11 @@ public class Piece : MonoBehaviour
 
     public void RemoveSelf()
     {
+        Debug.Log($"{pieceColor} {pieceType} at {cx},{cy} removed");
         if (pieceState != PieceState.ALIVE) return;
         pieceState = PieceState.DEAD;
-        GetComponent<Renderer>().enabled = false;
+        GetComponent<SpriteRenderer>().enabled = false;
+        SetXY(-1,-1);
     }
     
     void Start()

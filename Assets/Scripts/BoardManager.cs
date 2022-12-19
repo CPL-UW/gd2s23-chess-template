@@ -23,24 +23,26 @@ public class BoardManager : MonoBehaviour
     private float _dy = 1;
     private PieceColor _turn = PieceColor.WHITE;
     private int _ticksSinceLastMove = 0;
-    public int ticksPerMove = 10; 
+    public int ticksPerMove = 10;
+    private bool _weAreLive = false;
     
 
     private void GetPieceGridBounds()
     {
-        _xMax = _xMin = 0;
-        _yMax = _yMin = 0;
-        foreach (var p in pieces.Select(piece => piece.transform.position))
-        {
-            if (p.x > _xMax)
-                _xMax = p.x;
-            if (p.x < _xMin)
-                _xMin = p.x;
-            if (p.y > _yMax)
-                _yMax = p.y;
-            if (p.y < _yMin)
-                _yMin = p.y;
-        }
+        // Debug.Log($"parent.localScale: {pieces.ElementAt(0).transform.parent.localScale}; localPosition: {pieces.ElementAt(0).transform.localPosition}");
+        
+        _xMax = _yMax = 0.77f;
+        _yMin = _xMin = -0.77f;
+        // TODO pretty effing brittle!
+        
+        
+        // foreach (var pos in pieces.Select(piece => piece.transform.localPosition))
+        // {
+        //     if (pos.x > _xMax) _xMax = pos.x;
+        //     if (pos.x < _xMin) _xMin = pos.x;
+        //     if (pos.y > _yMax) _yMax = pos.y;
+        //     if (pos.y < _yMin) _yMin = pos.y;
+        // }
 
         _dx = (_xMax - _xMin) / 7;
         _dy = (_yMax - _yMin) / 7;
@@ -69,7 +71,7 @@ public class BoardManager : MonoBehaviour
             {
                 var x = cx2tx(piece.cx);
                 var y = cy2ty(piece.cy);
-                piece.transform.position = new Vector3(x, y, 0);
+                piece.transform.localPosition = new Vector3(x, y, 0);
             }
         }
     }
@@ -77,10 +79,9 @@ public class BoardManager : MonoBehaviour
     private void DoRandomBoardMove()
     {
         
-        var turnPieces = pieces.Where(piece => piece.pieceState == PieceState.ALIVE && piece.pieceColor == _turn).ToList();
+        var turnPieces = pieces.Where(piece => piece.pieceColor == _turn).ToList();
         if (turnPieces.Any())
         {
-            // var randomPiece = turnPieces.ElementAt(Random.Range(0, turnPieces.Count()));
             var bestMove = BestMove(turnPieces);
             if (bestMove != null && bestMove.NotZero())
             {
@@ -108,6 +109,7 @@ public class BoardManager : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (!_weAreLive) return;
         if (++_ticksSinceLastMove % ticksPerMove != 0) return;
         DoRandomBoardMove();
         _ticksSinceLastMove = 0;
@@ -125,7 +127,7 @@ public class BoardManager : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Space))
         {
-            GetPieceGridBounds();
+            _weAreLive = true;
             DoRandomBoardMove();
         }
     }
