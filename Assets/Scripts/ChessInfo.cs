@@ -1,8 +1,19 @@
 using System.Collections.Generic;
+using UnityEngine;
+
 
 public static class ChessInfo
 {
 
+    public static void Shuffle<T>(this IList<T> list)  
+    {  
+        var n = list.Count;  
+        while (n-- > 1) {
+            var k = Random.Range(0,n + 1);  
+            (list[k], list[n]) = (list[n], list[k]);
+        }  
+    }
+    
     public enum PieceType
     {
         NONE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING
@@ -22,6 +33,7 @@ public static class ChessInfo
         public readonly int x;
         public readonly int y;
         public readonly Piece piece;
+        public float score;
 
         public PieceMove(Piece curPiece, int cx, int cy)
         {

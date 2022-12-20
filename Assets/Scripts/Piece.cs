@@ -1,7 +1,8 @@
 using UnityEngine;
 using static ChessInfo;
 
-public class Piece : MonoBehaviour
+
+public class Piece :  MonoBehaviour 
 {
     public PieceType pieceType;
     public PieceColor pieceColor;
@@ -14,20 +15,25 @@ public class Piece : MonoBehaviour
     {
     }
 
-    // public Piece(Piece other)
-    // {
-    //     
-    //     pieceType = other.pieceType;
-    //     pieceColor = other.pieceColor;
-    //     pieceState = other.pieceState;
-    //     cx = other.cx;
-    //     cy = other.cy;
-    // }
+    public Piece(Piece other)
+    {
+        pieceType = other.pieceType;
+        pieceColor = other.pieceColor;
+        pieceState = other.pieceState;
+        cx = other.cx;
+        cy = other.cy;
+        pieceID = Random.Range(10000000, 100000000);
+        // Debug.Log($"Cloning {other.pieceID} => {pieceID}");
+    }
 
     public void SetXY(int x, int y)
     {
         cx = x; cy = y;
     }
+    
+    
+    public int X() { return cx; }
+    public int Y() { return cy; }
 
     public void RemoveSelf()
     {
