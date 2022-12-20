@@ -74,14 +74,14 @@ public class BoardManager : MonoBehaviour
     {
         var moved = false;
         
-        foreach (var piece in pieces.Where(piece => !ValidXY(piece.cx,piece.cy) && piece.pieceState == PieceState.ALIVE))
+        foreach (var piece in pieces.Where(piece => !ValidXY(piece.X(),piece.Y()) && piece.Alive()))
         {
             Debug.Log($"REMOVING IN BM? {piece}");
             piece.RemoveSelf();
             moved = true;
         }
 
-        foreach( var piece in pieces.Where(piece => piece.pieceState == PieceState.ALIVE && DistanceToTarget(piece) > TOLERANCE))
+        foreach( var piece in pieces.Where(piece => piece.Alive() && DistanceToTarget(piece) > TOLERANCE))
         {
             piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, PieceTargetPos(piece), 0.1f);
             moved = true;
@@ -92,7 +92,7 @@ public class BoardManager : MonoBehaviour
 
     private void DoRandomBoardMove()
     {
-        var livePieces = pieces.Where(piece => piece.pieceState == PieceState.ALIVE).ToList();
+        var livePieces = pieces.Where(piece => piece.Alive()).ToList();
         if (livePieces.Any(piece => piece.pieceColor == _turn))
         {
             var bestMove = BestMove(ref livePieces, _turn);

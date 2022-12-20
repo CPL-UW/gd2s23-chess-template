@@ -10,21 +10,22 @@ public class Piece :  MonoBehaviour
     public int cx;
     public int cy;
     public int pieceID;
-
+    public PieceInfo pieceInfo;
+    
     private Piece()
     {
     }
-
-    public Piece(Piece other)
-    {
-        pieceType = other.pieceType;
-        pieceColor = other.pieceColor;
-        pieceState = other.pieceState;
-        cx = other.cx;
-        cy = other.cy;
-        pieceID = Random.Range(10000000, 100000000);
-        // Debug.Log($"Cloning {other.pieceID} => {pieceID}");
-    }
+    //
+    // public Piece(Piece other)
+    // {
+    //     pieceType = other.pieceType;
+    //     pieceColor = other.pieceColor;
+    //     pieceState = other.pieceState;
+    //     cx = other.cx;
+    //     cy = other.cy;
+    //     pieceID = Random.Range(10000000, 100000000);
+    //     // Debug.Log($"Cloning {other.pieceID} => {pieceID}");
+    // }
 
     public void SetXY(int x, int y)
     {
@@ -34,6 +35,10 @@ public class Piece :  MonoBehaviour
     
     public int X() { return cx; }
     public int Y() { return cy; }
+
+    public bool Alive() { return pieceState == PieceState.ALIVE; }
+    public PieceColor Color() { return pieceColor; }
+    public PieceType PType() { return pieceType; }
 
     public void RemoveSelf()
     {
