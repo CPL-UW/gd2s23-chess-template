@@ -8,7 +8,7 @@ public static class ChessRules
 {
     
 
-    // private static List<Piece> CopyBoard(IEnumerable<Piece> pieces)
+    // private static List<PieceInfo> CopyBoard(IEnumerable<Piece> pieces)
     // {
     //     return pieces.Select(piece => new Piece(piece)).ToList();
     // }
@@ -19,13 +19,13 @@ public static class ChessRules
     }
 
     
-    private static bool DuplicatesExist(ref List<Piece> pieces)
+    private static bool DuplicatesExist(ref List<IPieceData> pieces)
     {
         return pieces
             .GroupBy(x => x.X() + x.Y() * 100).Count(g => g.Count() > 1) > 0;
     }
 
-    private static bool MovePiece(ref List<Piece> pieces, int startX, int startY, int targetX, int targetY)
+    private static bool MovePiece(ref List<IPieceData> pieces, int startX, int startY, int targetX, int targetY)
     {
         if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return false;
         if (DuplicatesExist(ref pieces))
@@ -56,7 +56,7 @@ public static class ChessRules
         return true;
     }
 
-    public static void MoveOnePiece(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    public static void MoveOnePiece(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (CheckValidMove(ref pieces, pieceToMove, dcx, dcy))
         {
@@ -72,44 +72,44 @@ public static class ChessRules
         else
         {
             Debug.Log(
-                $"Invalid Move: {pieceToMove.pieceType} ({pieceToMove.X()},{pieceToMove.Y()}) to ({pieceToMove.X() + dcx},{pieceToMove.Y() + dcy})");
+                $"Invalid Move: {pieceToMove.PType()} ({pieceToMove.X()},{pieceToMove.Y()}) to ({pieceToMove.X() + dcx},{pieceToMove.Y() + dcy})");
         }
     }
 
-    private static Piece GetPieceAt(ref List<Piece> pieces, int x, int y)
+    private static IPieceData GetPieceAt(ref List<IPieceData> pieces, int x, int y)
     {
         return pieces.Find(piece => piece.X() == x && piece.Y() == y);
     }
 
-    private static bool AnyPieceAt(ref List<Piece> pieces, int x, int y)
+    private static bool AnyPieceAt(ref List<IPieceData> pieces, int x, int y)
     {
         return pieces.Any(piece => piece.X() == x && piece.Y() == y);
     }
 
-    private static bool RulePawn(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool RulePawn(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
-        var validYDir = pieceToMove.pieceColor == PieceColor.WHITE ? 1 : -1;
+        var validYDir = pieceToMove.Color() == PieceColor.WHITE ? 1 : -1;
         if (0 == dcx && dcy == validYDir && !AnyPieceAt(ref pieces, pieceToMove.X(), pieceToMove.Y() + dcy))
             return true;
         if (1 != Mathf.Abs(dcx) || dcy != validYDir) return false;
         var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
-        return null != targetPiece && targetPiece.pieceColor != pieceToMove.pieceColor;
+        return null != targetPiece && targetPiece.Color() != pieceToMove.Color();
     }
 
-    private static bool RuleKing(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool RuleKing(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (Mathf.Abs(dcx) > 1 || Mathf.Abs(dcy) > 1) return false;
         var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return !AnyPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy) ||
-               targetPiece.pieceColor != pieceToMove.pieceColor;
+               targetPiece.Color() != pieceToMove.Color();
     }
 
-    private static bool RuleQueen(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool RuleQueen(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         return RuleRook(ref pieces, pieceToMove, dcx, dcy) || RuleBishop(ref pieces, pieceToMove, dcx, dcy);
     }
 
-    private static bool RuleRook(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool RuleRook(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         // only move in the x or y direction
         if (dcx * dcy != 0 || (dcx == 0 && dcy == 0)) return false;
@@ -130,11 +130,11 @@ public static class ChessRules
         
         // if the way was clean, check the target
         var targetPiece = GetPieceAt(ref pieces,pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
-        return null == targetPiece || targetPiece.pieceColor != pieceToMove.pieceColor;
+        return null == targetPiece || targetPiece.Color() != pieceToMove.Color();
     }
     
 
-    private static bool RuleBishop(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool RuleBishop(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         // only move diagonal
         if (dcx == 0 || dcy == 0 || Mathf.Abs(dcx) != Mathf.Abs(dcy)) return false;
@@ -151,17 +151,17 @@ public static class ChessRules
         // if the way was clean, check the target
         var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return !AnyPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy) ||
-               targetPiece.pieceColor != pieceToMove.pieceColor;
+               targetPiece.Color() != pieceToMove.Color();
     }
 
-    private static bool RuleKnight(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool RuleKnight(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if ((Mathf.Abs(dcx) == 2 && Mathf.Abs(dcy) == 1) ||
             (Mathf.Abs(dcx) == 1 && Mathf.Abs(dcy) == 2))
         {
             var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
             if (!AnyPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy) ||
-                targetPiece.pieceColor != pieceToMove.pieceColor)
+                targetPiece.Color() != pieceToMove.Color())
                 return true;
         }
 
@@ -169,10 +169,10 @@ public static class ChessRules
     }
 
 
-    private static bool CheckPieceRules(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool CheckPieceRules(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (!ValidXY(pieceToMove.X() + dcx, pieceToMove.Y() + dcy)) return false;
-        return pieceToMove.pieceType switch
+        return pieceToMove.PType() switch
         {
             PieceType.PAWN => RulePawn(ref pieces, pieceToMove, dcx, dcy),
             PieceType.KING => RuleKing(ref pieces, pieceToMove, dcx, dcy),
@@ -184,7 +184,7 @@ public static class ChessRules
         };
     }
 
-    private static bool CheckValidMove(ref List<Piece> pieces, Piece pieceToMove, int dcx, int dcy)
+    private static bool CheckValidMove(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (null == pieceToMove ||
             !ValidXY(pieceToMove.X(), pieceToMove.Y()) ||
@@ -193,7 +193,7 @@ public static class ChessRules
         return CheckPieceRules(ref pieces, pieceToMove, dcx, dcy);
     }
 
-    private static IEnumerable<PieceMove> GetValidMoves(ref List<Piece> pieces, Piece pieceToMove)
+    private static IEnumerable<PieceMove> GetValidMoves(ref List<IPieceData> pieces, IPieceData pieceToMove)
     {
         var validMoves = new List<PieceMove>();
         for (var dx = -7; dx <= 7; dx++)
@@ -210,7 +210,7 @@ public static class ChessRules
         return validMoves;
     }
     
-    private static int BoardScore(ref List<Piece> pieces, PieceColor turn)
+    private static int BoardScore(ref List<IPieceData> pieces, PieceColor turn)
     {
         var score = 0;
         var livePieces = pieces.Where(p => p.Alive()).ToList();
@@ -233,12 +233,12 @@ public static class ChessRules
         return score;
     }
 
-    // private static List<PieceInfo> GetTestBoard(List<Piece> pieces)
+    // private static List<PieceInfo> GetTestBoard(List<PieceInfo> pieces)
     // {
     //     return pieces.Select(piece => new PieceInfo(piece)).ToList();
     // }
 
-    private static PieceMove BestScoredMove(ref List<Piece> pieces, List<PieceMove> moves, PieceColor turn)
+    private static PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
         if (pieces == null || moves == null || moves.Count == 0) return null;
         // var scores = "";
@@ -266,7 +266,7 @@ public static class ChessRules
         return moves[0];
     }
     
-    public static PieceMove BestMove(ref List<Piece> pieces, PieceColor turn)
+    public static PieceMove BestMove(ref List<IPieceData> pieces, PieceColor turn)
     {
         var validMoves = new List<PieceMove>();
         var turnPieces = pieces.Where(piece => piece.Color() == turn);

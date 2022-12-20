@@ -2,7 +2,7 @@ using UnityEngine;
 using static ChessInfo;
 
 
-public class Piece :  MonoBehaviour 
+public class Piece :  MonoBehaviour, IPieceData
 {
     public PieceType pieceType;
     public PieceColor pieceColor;
@@ -10,7 +10,6 @@ public class Piece :  MonoBehaviour
     public int cx;
     public int cy;
     public int pieceID;
-    public PieceInfo pieceInfo;
     
     private Piece()
     {
@@ -27,11 +26,7 @@ public class Piece :  MonoBehaviour
     //     // Debug.Log($"Cloning {other.pieceID} => {pieceID}");
     // }
 
-    public void SetXY(int x, int y)
-    {
-        cx = x; cy = y;
-    }
-    
+    public void SetXY(int x, int y) { cx = x; cy = y; }
     
     public int X() { return cx; }
     public int Y() { return cy; }
@@ -39,6 +34,10 @@ public class Piece :  MonoBehaviour
     public bool Alive() { return pieceState == PieceState.ALIVE; }
     public PieceColor Color() { return pieceColor; }
     public PieceType PType() { return pieceType; }
+    public int PieceID()
+    {
+        return pieceID;
+    }
 
     public void RemoveSelf()
     {

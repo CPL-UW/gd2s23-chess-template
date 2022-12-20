@@ -32,10 +32,10 @@ public static class ChessInfo
     {
         public readonly int x;
         public readonly int y;
-        public readonly Piece piece;
+        public readonly IPieceData piece;
         public float score;
 
-        public PieceMove(Piece curPiece, int cx, int cy)
+        public PieceMove(IPieceData curPiece, int cx, int cy)
         {
             piece = curPiece;
             x = cx;

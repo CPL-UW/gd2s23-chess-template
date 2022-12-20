@@ -92,8 +92,8 @@ public class BoardManager : MonoBehaviour
 
     private void DoRandomBoardMove()
     {
-        var livePieces = pieces.Where(piece => piece.Alive()).ToList();
-        if (livePieces.Any(piece => piece.pieceColor == _turn))
+        var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
+        if (livePieces.Any(piece => piece.Color() == _turn))
         {
             var bestMove = BestMove(ref livePieces, _turn);
             if (bestMove != null && bestMove.NotZero())
