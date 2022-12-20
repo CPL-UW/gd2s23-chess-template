@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 public static class ChessInfo
@@ -20,9 +19,9 @@ public static class ChessInfo
 
     public class PieceMove
     {
-        public int x;
-        public int y;
-        public Piece piece = null;
+        public readonly int x;
+        public readonly int y;
+        public readonly Piece piece;
 
         public PieceMove(Piece curPiece, int cx, int cy)
         {

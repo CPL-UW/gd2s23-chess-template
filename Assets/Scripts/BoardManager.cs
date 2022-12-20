@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
 using static ChessRules;
 using static ChessInfo;
 
@@ -13,7 +12,7 @@ public class BoardManager : MonoBehaviour
     // public List<Piece> p2Pieces;
 
     private float _screenWidth;
-    private const float TOLERANCE = 0.1f;
+    private const float TOLERANCE = 0.01f;
     // private Rect _pieceBounds = Rect.zero;
     private float _xMax;
     private float _yMax;
@@ -22,9 +21,9 @@ public class BoardManager : MonoBehaviour
     private float _dx = 1;
     private float _dy = 1;
     private PieceColor _turn = PieceColor.WHITE;
-    private int _ticksSinceLastMove = 0;
+    private int _ticksSinceLastMove;
     public int ticksPerMove = 10;
-    private bool _weAreLive = false;
+    private bool _weAreLive;
     
 
     private void GetPieceGridBounds()
@@ -49,48 +48,63 @@ public class BoardManager : MonoBehaviour
         Debug.Log($"BOUNDS_UPDATE: {_xMin}=>{_xMax} dx={_dx}");
     }
 
+    // ReSharper disable once InconsistentNaming
     private float cx2tx(int cx)
     {
         return _xMin + (cx - 1) * _dx;
     }
     
+    // ReSharper disable once InconsistentNaming
     private float cy2ty(int cy)
     {
         return _yMin + (cy - 1) * _dy;
     }
     
-    private void UpdatePieceLocations()
+    private Vector3 PieceTargetPos(Piece piece)
     {
-        foreach (var piece in pieces)
+        return new Vector3(cx2tx(piece.cx), cy2ty(piece.cy), 0);
+    }
+    
+    private float DistanceToTarget(Piece piece)
+    {
+        return Vector3.Distance(piece.transform.localPosition, PieceTargetPos(piece));
+    }
+    
+    private bool UpdatePieceLocations()
+    {
+        var moved = false;
+        
+        foreach (var piece in pieces.Where(piece => !ValidXY(piece.cx,piece.cy) && piece.pieceState == PieceState.ALIVE))
         {
-            if (piece.cx < 1 || piece.cy < 1 || piece.pieceState == PieceState.DEAD)
-            {
-                piece.RemoveSelf();
-            }
-            else
-            {
-                var x = cx2tx(piece.cx);
-                var y = cy2ty(piece.cy);
-                piece.transform.localPosition = new Vector3(x, y, 0);
-            }
+            Debug.Log($"REMOVING IN BM? {piece}");
+            piece.RemoveSelf();
+            moved = true;
         }
+
+        foreach( var piece in pieces.Where(piece => piece.pieceState == PieceState.ALIVE && DistanceToTarget(piece) > TOLERANCE))
+        {
+            piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, PieceTargetPos(piece), 0.1f);
+            moved = true;
+        }
+
+        return moved;
     }
 
     private void DoRandomBoardMove()
     {
-        
-        var turnPieces = pieces.Where(piece => piece.pieceColor == _turn).ToList();
-        if (turnPieces.Any())
+        var livePieces = pieces.Where(piece => piece.pieceState == PieceState.ALIVE).ToList();
+        if (livePieces.Any(piece => piece.pieceColor == _turn))
         {
-            var bestMove = BestMove(turnPieces);
+            var bestMove = BestMove(ref livePieces, _turn);
             if (bestMove != null && bestMove.NotZero())
             {
-                MoveOnePiece(turnPieces, bestMove.piece, bestMove.x, bestMove.y);
+                MoveOnePiece(ref livePieces, bestMove.piece, bestMove.x, bestMove.y);
             }
         }
         else
         {
-            Debug.Log($"No pieces for {_turn}");
+            Debug.Log($"No pieces!");
+            Debug.Break();
         }
 
         EndTurn();
@@ -98,20 +112,24 @@ public class BoardManager : MonoBehaviour
 
     private void EndTurn()
     {
+        UpdatePieceLocations();
         _turn = _turn switch
         {
             PieceColor.WHITE => PieceColor.BLACK,
             _ => PieceColor.WHITE
         };
-
-        UpdatePieceLocations();
     }
+
+    
+    
 
     void FixedUpdate()
     {
         if (!_weAreLive) return;
+        if (UpdatePieceLocations()) return;
         if (++_ticksSinceLastMove % ticksPerMove != 0) return;
         DoRandomBoardMove();
+        // CheckDuplicates();
         _ticksSinceLastMove = 0;
     }
     
@@ -124,7 +142,7 @@ public class BoardManager : MonoBehaviour
             GetPieceGridBounds();
             _screenWidth = Screen.width;
         }
-
+        
         if (Input.GetKeyUp(KeyCode.Space))
         {
             _weAreLive = true;

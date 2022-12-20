@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using static ChessInfo;
 
@@ -11,6 +9,10 @@ public class Piece : MonoBehaviour
     public int cx;
     public int cy;
     public int pieceID;
+
+    private Piece()
+    {
+    }
 
     // public Piece(Piece other)
     // {
@@ -29,7 +31,7 @@ public class Piece : MonoBehaviour
 
     public void RemoveSelf()
     {
-        Debug.Log($"{pieceColor} {pieceType} at {cx},{cy} removed");
+        // Debug.Log($"RemoveSelf: {pieceColor} {pieceType} at {cx},{cy}");
         if (pieceState != PieceState.ALIVE) return;
         pieceState = PieceState.DEAD;
         GetComponent<SpriteRenderer>().enabled = false;
@@ -42,10 +44,5 @@ public class Piece : MonoBehaviour
         pieceState = PieceState.ALIVE;
         pieceID = Random.Range(10000000, 100000000);
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }
