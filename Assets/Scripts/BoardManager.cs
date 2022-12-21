@@ -24,6 +24,7 @@ public class BoardManager : MonoBehaviour
     private int _ticksSinceLastMove;
     public int ticksPerMove = 10;
     private bool _weAreLive;
+    private ChessAI _ai;
     
 
     private void GetPieceGridBounds()
@@ -92,13 +93,15 @@ public class BoardManager : MonoBehaviour
 
     private void DoRandomBoardMove()
     {
+        _ai ??= new ChessAIRandom();
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
         if (livePieces.Any(piece => piece.Color() == _turn))
         {
-            var bestMove = BestMove(ref livePieces, _turn);
+            var bestMove = _ai.BestMove(ref livePieces, _turn);
             if (bestMove != null && bestMove.NotZero())
             {
-                MoveOnePiece(ref livePieces, bestMove.piece, bestMove.x, bestMove.y);
+                var pieceToMove = pieces.FirstOrDefault(piece => piece.X() == bestMove.piece.X() && piece.Y() == bestMove.piece.Y());
+                MoveOnePiece(ref livePieces, pieceToMove, bestMove.x, bestMove.y);
             }
         }
         else
