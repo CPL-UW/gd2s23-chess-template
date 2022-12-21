@@ -47,7 +47,15 @@ public class Piece :  MonoBehaviour, IPieceData
         GetComponent<SpriteRenderer>().enabled = false;
         SetXY(-1,-1);
     }
-    
+
+    public string LocID()
+    {
+        var output = PType().ToString();
+        output += (char)('a' + (X() - 1));
+        output += Y().ToString();
+        return output;
+    }
+
     void Start()
     {
         name = $"{pieceColor}_{pieceType}_{cx}_{cy}";

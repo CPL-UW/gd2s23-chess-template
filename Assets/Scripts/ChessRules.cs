@@ -8,11 +8,6 @@ public static class ChessRules
 {
     
 
-    // private static List<PieceInfo> CopyBoard(IEnumerable<Piece> pieces)
-    // {
-    //     return pieces.Select(piece => new Piece(piece)).ToList();
-    // }
-
     public static bool ValidXY(int x, int y)
     {
         return x is >= 1 and <= 8 && y is >= 1 and <= 8;
@@ -49,10 +44,6 @@ public static class ChessRules
         }
 
         movingPiece.SetXY(targetX, targetY);
-        // if (DuplicatesExist(ref pieces))
-        // {
-        //     Debug.Log("MovePiece: Duplicates exist! BOTTOM");
-        // }
         return true;
     }
 
@@ -81,6 +72,11 @@ public static class ChessRules
         return pieces.Find(piece => piece.X() == x && piece.Y() == y);
     }
 
+    public static PieceColor OtherColor(PieceColor color)
+    {
+        return color == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+    }
+    
     private static bool AnyPieceAt(ref List<IPieceData> pieces, int x, int y)
     {
         return pieces.Any(piece => piece.X() == x && piece.Y() == y);
@@ -193,7 +189,7 @@ public static class ChessRules
         return CheckPieceRules(ref pieces, pieceToMove, dcx, dcy);
     }
 
-    public static IEnumerable<PieceMove> GetValidMoves(ref List<IPieceData> pieces, IPieceData pieceToMove)
+    private static IEnumerable<PieceMove> GetValidMoves(ref List<IPieceData> pieces, IPieceData pieceToMove)
     {
         var validMoves = new List<PieceMove>();
         for (var dx = -7; dx <= 7; dx++)
@@ -209,74 +205,17 @@ public static class ChessRules
 
         return validMoves;
     }
-    
-    // private static int BoardScore(ref List<IPieceData> pieces, PieceColor turn)
-    // {
-    //     var score = 0;
-    //     var livePieces = pieces.Where(p => p.Alive()).ToList();
-    //     foreach (var piece in livePieces)
-    //     {
-    //         var localScore = piece.PType() switch
-    //         {
-    //             PieceType.PAWN => 1,
-    //             PieceType.KING => 100,
-    //             PieceType.QUEEN => 9,
-    //             PieceType.ROOK => 5,
-    //             PieceType.BISHOP => 3,
-    //             PieceType.KNIGHT => 3,
-    //             _ => 0
-    //         };
-    //         if (piece.Color() != turn) localScore *= -1;
-    //         score += localScore;
-    //     }
-    //
-    //     return score;
-    // }
 
-    // private static List<PieceInfo> GetTestBoard(List<PieceInfo> pieces)
-    // {
-    //     return pieces.Select(piece => new PieceInfo(piece)).ToList();
-    // }
-
-    // private static PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
-    // {
-    //     if (pieces == null || moves == null || moves.Count == 0) return null;
-    //     // var scores = "";
-    //     // var lastScore = -1;
-    //     // PieceMove bestMove = null;
-    //     // foreach (var move in moves)
-    //     // {
-    //     //     var futurePieces = CopyBoard(pieces);
-    //     //     var pieceToMove = GetPieceAt(ref futurePieces, move.piece.X(), move.piece.Y());
-    //     //     MoveOnePiece(ref futurePieces, pieceToMove, move.x, move.y);
-    //     //     var curScore = BoardScore(ref futurePieces, turn);
-    //     //     if (lastScore != curScore)
-    //     //     {
-    //     //         scores += $"{curScore} ";
-    //     //         lastScore = curScore;
-    //     //     }
-    //     //     if (null == bestMove || curScore >= bestMove.score)
-    //     //     {
-    //     //         bestMove = move;
-    //     //         bestMove.score = curScore;
-    //     //     }
-    //     // }
-    //     // Debug.Log($"SCORES (out of {moves.Count}): {scores}"); // TODO always same scores :( 
-    //     // return bestMove;
-    //     return moves[0];
-    // }
-    
-    // public static PieceMove BestMove(ref List<IPieceData> pieces, PieceColor turn)
-    // {
-    //     var validMoves = new List<PieceMove>();
-    //     var turnPieces = pieces.Where(piece => piece.Color() == turn);
-    //     foreach (var piece in turnPieces)
-    //     {
-    //         validMoves.AddRange(GetValidMoves(ref pieces, piece));
-    //     }
-    //     validMoves.Shuffle();
-    //     // return validMoves.Count == 0 ? null : validMoves[Random.Range(0, validMoves.Count)];
-    //     return BestScoredMove(ref pieces, validMoves, turn);
-    // }
+    public static List<PieceMove> GetValidMovesByTurn(ref List<IPieceData> pieces, PieceColor turn)
+    {
+        var validMoves = new List<PieceMove>();
+        var turnPieces = pieces.Where(piece => piece.Color() == turn);
+        foreach (var piece in turnPieces)
+        {
+            validMoves.AddRange(GetValidMoves(ref pieces, piece));
+        }
+        validMoves.Shuffle();
+        return validMoves;
+    }
     
 }

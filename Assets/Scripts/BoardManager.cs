@@ -93,7 +93,7 @@ public class BoardManager : MonoBehaviour
 
     private void DoRandomBoardMove()
     {
-        _ai ??= new ChessAIDumb();
+        _ai ??= new ChessAIDeep();
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
         if (livePieces.Any(piece => piece.Color() == _turn))
         {
@@ -146,7 +146,7 @@ public class BoardManager : MonoBehaviour
             _screenWidth = Screen.width;
         }
         
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space) || Input.GetMouseButtonUp(0))
         {
             _weAreLive = true;
             DoRandomBoardMove();

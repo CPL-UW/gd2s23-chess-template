@@ -10,25 +10,35 @@ public interface IPieceData
     public PieceType PType();
     public int PieceID();
     public void RemoveSelf();
+    public string LocID();
 }
 
 public class PieceInfo : IPieceData
 {
-    private readonly PieceType _pieceType;
-    private readonly PieceColor _pieceColor;
+    private PieceType _pieceType;
+    private PieceColor _pieceColor;
     private PieceState _pieceState;
     private int _cx;
     private int _cy;
-    private readonly int _pieceID;
+    private int _pieceID;
 
     public PieceInfo(IPieceData pieceData)
     {
-        _pieceType = pieceData.PType();
-        _pieceColor = pieceData.Color();
-        _pieceState = pieceData.Alive() ? PieceState.ALIVE : PieceState.DEAD;
-        _cx = pieceData.X();
-        _cy = pieceData.Y();
-        _pieceID = pieceData.PieceID();
+        CopyInfo(pieceData);
+    }
+
+    public PieceInfo()
+    {
+    }
+
+    public void CopyInfo(IPieceData other)
+    {
+        _pieceType = other.PType();
+        _pieceColor = other.Color();
+        _pieceState = other.Alive() ? PieceState.ALIVE : PieceState.DEAD;
+        _cx = other.X();
+        _cy = other.Y();
+        _pieceID = other.PieceID();
     }
 
     public void SetXY(int x, int y) { _cx = x; _cy = y; }
@@ -41,6 +51,14 @@ public class PieceInfo : IPieceData
     public PieceColor Color() { return _pieceColor; }
     public PieceType PType() { return _pieceType; }
 
+    public string LocID()
+    {
+        var output = PType().ToString();
+        output += (char)('a' + (X() - 1));
+        output += Y().ToString();
+        return output;
+    }
+    
     public void RemoveSelf()
     {
         _pieceState = PieceState.DEAD;

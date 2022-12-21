@@ -31,21 +31,51 @@ public abstract class ChessAI
 
     protected abstract PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn);
 
-    protected List<IPieceData> SimBoardCopy(ref List<IPieceData> pieces)
+    protected static List<IPieceData> SimBoardCopy(IEnumerable<IPieceData> pieces)
     {
-        return pieces.Select(piece => new PieceInfo(piece)).Cast<IPieceData>().ToList();
+        // return pieces.Select(piece => new PieceInfo(piece)).Cast<IPieceData>().ToList();
+        var newList = new List<PieceInfo>();
+        foreach (var piece in pieces)
+        {
+            var newPiece = new PieceInfo();
+            newPiece.CopyInfo(piece);
+            newList.Add(newPiece);
+        }
+        return newList.Cast<IPieceData>().ToList();
     }
 
     public PieceMove BestMove(ref List<IPieceData> pieces, PieceColor turn)
     {
-        var validMoves = new List<PieceMove>();
-        var turnPieces = pieces.Where(piece => piece.Color() == turn);
-        foreach (var piece in turnPieces)
-        {
-            validMoves.AddRange(GetValidMoves(ref pieces, piece));
+        return BestScoredMove(ref pieces, GetValidMovesByTurn(ref pieces, turn), turn);
+    }
+}
+
+public class ChessAIDeep : ChessAI
+{
+    private PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth)
+    {
+        if (pieces == null || depth < 0) return null;
+        
+        var validMoves = GetValidMovesByTurn(ref pieces, turn);
+        if (validMoves == null || validMoves.Count == 0) return null;
+        foreach (var move in validMoves) {
+            var simBoard = SimBoardCopy(pieces.Where(piece => piece.Alive()));
+            var pieceToMove = GetPieceAt(ref simBoard, move.piece.X(), move.piece.Y());
+            MoveOnePiece(ref simBoard, pieceToMove, move.x, move.y);
+            if (depth > 1)
+            {
+                var deepMove = BestMoveDeep(simBoard, OtherColor(turn), depth - 1);
+                move.score = -1 * deepMove?.score ?? 0;
+            } else {
+                move.score = BoardScore(ref simBoard, turn);
+            }
         }
-        validMoves.Shuffle();
-        return BestScoredMove(ref pieces, validMoves, turn);
+        return validMoves.OrderByDescending(m => m.score).FirstOrDefault();
+    }
+    
+    protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
+    {
+        return BestMoveDeep(pieces, turn, 2);
     }
 }
 
@@ -59,7 +89,7 @@ public class ChessAIDumb : ChessAI
         PieceMove bestMove = null;
         foreach (var move in moves)
         {
-            var futurePieces = SimBoardCopy(ref pieces);
+            var futurePieces = SimBoardCopy(pieces);
             var pieceToMove = GetPieceAt(ref futurePieces, move.piece.X(), move.piece.Y());
             MoveOnePiece(ref futurePieces, pieceToMove, move.x, move.y);
             var curScore = BoardScore(ref futurePieces, turn);
