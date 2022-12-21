@@ -93,7 +93,7 @@ public class BoardManager : MonoBehaviour
 
     private void DoRandomBoardMove()
     {
-        _ai ??= new ChessAIRandom();
+        _ai ??= new ChessAIDumb();
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
         if (livePieces.Any(piece => piece.Color() == _turn))
         {
