@@ -44,10 +44,20 @@ public class Piece :  MonoBehaviour, IPieceData
         // Debug.Log($"RemoveSelf: {pieceColor} {pieceType} at {cx},{cy}");
         if (pieceState != PieceState.ALIVE) return;
         pieceState = PieceState.DEAD;
-        GetComponent<SpriteRenderer>().enabled = false;
+        Hide();
         SetXY(-1,-1);
     }
 
+    private void Hide()
+    {
+        GetComponent<SpriteRenderer>().enabled = false;
+    }
+
+    private void Show()
+    {
+        GetComponent<SpriteRenderer>().enabled = true;
+    }
+    
     public string LocID()
     {
         var output = PType().ToString();
@@ -60,6 +70,7 @@ public class Piece :  MonoBehaviour, IPieceData
     {
         name = $"{pieceColor}_{pieceType}_{cx}_{cy}";
         pieceState = PieceState.ALIVE;
+        Show();
         pieceID = Random.Range(10000000, 100000000);
     }
     

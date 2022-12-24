@@ -25,46 +25,42 @@ public static class ChessRules
         if (!ValidXY(startX, startY) || !ValidXY(targetX, targetY)) return false;
         if (DuplicatesExist(ref pieces))
         {
-            Debug.Log("MovePiece: Duplicates exist! TOP");
+            // Debug.Log("MovePiece: Duplicates exist!");
             return false;
         }
 
         var movingPiece = pieces.Find(piece => piece.X() == startX && piece.Y() == startY);
         if (movingPiece == null)
         {
-            Debug.Log("Moving piece is null");
             return false;
         }
 
         var targetPiece = pieces.Find(piece => piece.X() == targetX && piece.Y() == targetY);
-        if (null != targetPiece)
-        {
-            // Debug.Log($"REMOVING {targetPiece}");
-            targetPiece.RemoveSelf();
-        }
+        targetPiece?.RemoveSelf();
 
         movingPiece.SetXY(targetX, targetY);
         return true;
     }
 
-    public static void MoveOnePiece(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
+    public static bool MoveXY(ref List<IPieceData> pieces, int startX, int startY, int dcx, int dcy)
+    {
+        return MoveOnePiece(ref pieces, GetPieceAt(ref pieces, startX, startY), dcx, dcy);
+    }
+
+    public static bool MoveOnePiece(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (CheckValidMove(ref pieces, pieceToMove, dcx, dcy))
         {
-            if (MovePiece(ref pieces, pieceToMove.X(), pieceToMove.Y(), pieceToMove.X() + dcx, pieceToMove.Y() + dcy))
+            if (!MovePiece(ref pieces, pieceToMove.X(), pieceToMove.Y(), pieceToMove.X() + dcx, pieceToMove.Y() + dcy))
             {
-                // Debug.Log($"SUCCESS {pieceToMove.X()},{pieceToMove.Y()} to {pieceToMove.X() + dcx},{pieceToMove.Y() + dcy}");
+                Debug.Log($"Fail M1P: {pieceToMove.X()},{pieceToMove.Y()} to {pieceToMove.X() + dcx},{pieceToMove.Y() + dcy}");
             }
-            else
-            {
-                Debug.Log($"FAIL {pieceToMove.X()},{pieceToMove.Y()} to {pieceToMove.X() + dcx},{pieceToMove.Y() + dcy}");
-            }
+
+            return true;
         }
-        else
-        {
-            Debug.Log(
-                $"Invalid Move: {pieceToMove.PType()} ({pieceToMove.X()},{pieceToMove.Y()}) to ({pieceToMove.X() + dcx},{pieceToMove.Y() + dcy})");
-        }
+
+        Debug.Log($"Invalid M1P: {pieceToMove.PType()} ({pieceToMove.X()},{pieceToMove.Y()}) to ({pieceToMove.X() + dcx},{pieceToMove.Y() + dcy})");
+        return false;
     }
 
     public static IPieceData GetPieceAt(ref List<IPieceData> pieces, int x, int y)
@@ -179,7 +175,8 @@ public static class ChessRules
             _ => false
         };
     }
-
+    
+    
     private static bool CheckValidMove(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (null == pieceToMove ||

@@ -15,7 +15,7 @@ public abstract class ChessAI
             var localScore = piece.PType() switch
             {
                 PieceType.PAWN => 1,
-                PieceType.KING => 100,
+                PieceType.KING => 1000,
                 PieceType.QUEEN => 9,
                 PieceType.ROOK => 5,
                 PieceType.BISHOP => 3,
@@ -41,6 +41,7 @@ public abstract class ChessAI
             newPiece.CopyInfo(piece);
             newList.Add(newPiece);
         }
+
         return newList.Cast<IPieceData>().ToList();
     }
 
@@ -52,30 +53,32 @@ public abstract class ChessAI
 
 public class ChessAIDeep : ChessAI
 {
-    private PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth)
+    private static PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth)
     {
-        if (pieces == null || depth < 0) return null;
-        
+        if (pieces == null || depth < 0) return new PieceMove();
+
         var validMoves = GetValidMovesByTurn(ref pieces, turn);
-        if (validMoves == null || validMoves.Count == 0) return null;
-        foreach (var move in validMoves) {
+        if (validMoves.Count == 0) return new PieceMove();
+        foreach (var move in validMoves)
+        {
             var simBoard = SimBoardCopy(pieces.Where(piece => piece.Alive()));
-            var pieceToMove = GetPieceAt(ref simBoard, move.piece.X(), move.piece.Y());
-            MoveOnePiece(ref simBoard, pieceToMove, move.x, move.y);
-            if (depth > 1)
+            if (depth > 1 && MoveXY(ref simBoard, move.piece.X(), move.piece.Y(), move.x, move.y))
             {
                 var deepMove = BestMoveDeep(simBoard, OtherColor(turn), depth - 1);
-                move.score = -1 * deepMove?.score ?? 0;
-            } else {
-                move.score = BoardScore(ref simBoard, turn);
+                move.score = -1 * deepMove?.score ?? BoardScore(ref pieces, turn);
+            }
+            else
+            {
+                move.score = BoardScore(ref pieces, turn);
             }
         }
+
         return validMoves.OrderByDescending(m => m.score).FirstOrDefault();
     }
-    
+
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
-        return BestMoveDeep(pieces, turn, 2);
+        return BestMoveDeep(pieces, turn, 3);
     }
 }
 
@@ -98,13 +101,15 @@ public class ChessAIDumb : ChessAI
                 scores += $"{curScore} ";
                 lastScore = curScore;
             }
+
             if (null == bestMove || curScore >= bestMove.score)
             {
                 bestMove = move;
                 bestMove.score = curScore;
             }
         }
-        Debug.Log($"SCORES (out of {moves.Count}): {scores}"); 
+
+        Debug.Log($"SCORES (out of {moves.Count}): {scores}");
         return bestMove;
     }
 }

@@ -75,16 +75,9 @@ public class BoardManager : MonoBehaviour
     {
         var moved = false;
         
-        foreach (var piece in pieces.Where(piece => !ValidXY(piece.X(),piece.Y()) && piece.Alive()))
-        {
-            Debug.Log($"REMOVING IN BM? {piece}");
-            piece.RemoveSelf();
-            moved = true;
-        }
-
         foreach( var piece in pieces.Where(piece => piece.Alive() && DistanceToTarget(piece) > TOLERANCE))
         {
-            piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, PieceTargetPos(piece), 0.1f);
+            piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, PieceTargetPos(piece), 0.25f);
             moved = true;
         }
 

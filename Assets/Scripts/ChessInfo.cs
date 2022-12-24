@@ -43,6 +43,12 @@ public static class ChessInfo
             y = cy;
         }
 
+        public PieceMove()
+        {
+            x = y = 0;
+            score = 0;
+        }
+
         public bool NotZero()
         {
             return 0 != x || 0 != y;
