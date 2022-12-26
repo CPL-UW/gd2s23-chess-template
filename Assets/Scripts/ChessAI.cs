@@ -6,6 +6,12 @@ using static ChessRules;
 
 public abstract class ChessAI
 {
+    protected string aiName = "ChessAI";
+    public string GetAIDescription()
+    {
+        return aiName;
+    }
+    
     protected static int BoardScore(ref List<IPieceData> pieces, PieceColor turn)
     {
         var score = 0;
@@ -53,6 +59,8 @@ public abstract class ChessAI
 
 public class ChessAIDeep : ChessAI
 {
+    public ChessAIDeep() => aiName = "Deep AI";
+    
     private static PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth)
     {
         if (pieces == null || depth < 0) return new PieceMove();
@@ -82,8 +90,9 @@ public class ChessAIDeep : ChessAI
     }
 }
 
-public class ChessAIDumb : ChessAI
+public class ChessAISimple : ChessAI
 {
+    public ChessAISimple() => aiName = "Simple AI";
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
         if (pieces == null || moves == null || moves.Count == 0) return null;
@@ -116,6 +125,8 @@ public class ChessAIDumb : ChessAI
 
 public class ChessAIRandom : ChessAI
 {
+    public ChessAIRandom() => aiName = "Random AI";
+    
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
         if (pieces == null || moves == null || moves.Count == 0) return null;

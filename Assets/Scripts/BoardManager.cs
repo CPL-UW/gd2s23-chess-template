@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using static ChessRules;
 using static ChessInfo;
@@ -25,6 +26,8 @@ public class BoardManager : MonoBehaviour
     public int ticksPerMove = 10;
     private bool _weAreLive;
     private ChessAI _ai;
+    public TextMeshProUGUI topText;
+    public TextMeshProUGUI bottomText;
     
 
     private void GetPieceGridBounds()
@@ -86,7 +89,7 @@ public class BoardManager : MonoBehaviour
 
     private void DoRandomBoardMove()
     {
-        _ai ??= new ChessAIDeep();
+        _ai ??= new ChessAISimple();
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
         if (livePieces.Any(piece => piece.Color() == _turn))
         {
@@ -106,9 +109,29 @@ public class BoardManager : MonoBehaviour
         EndTurn();
     }
 
+    public void OnClick(string buttonName)
+    {
+        Debug.Log($"BoardManager.OnClick: {buttonName}");
+        _ai = buttonName switch
+        {
+            "random" => new ChessAIRandom(),
+            "simple" => new ChessAISimple(),
+            "deep" => new ChessAIDeep(),
+            _ => _ai
+        };
+    }
+
+    private void UpdateText()
+    {
+        if (!_weAreLive) return;
+        topText.text = "";
+        bottomText.text = _ai.GetAIDescription();
+    }
+
     private void EndTurn()
     {
         UpdatePieceLocations();
+        UpdateText();
         _turn = _turn switch
         {
             PieceColor.WHITE => PieceColor.BLACK,
