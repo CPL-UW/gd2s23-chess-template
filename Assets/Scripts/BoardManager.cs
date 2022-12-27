@@ -116,7 +116,7 @@ public class BoardManager : MonoBehaviour
         {
             "random" => new ChessAIRandom(),
             "simple" => new ChessAISimple(),
-            "deep" => new ChessAIDeep(5,3),
+            "deep" => new ChessAIDeep(10,3),
             _ => _ai
         };
     }

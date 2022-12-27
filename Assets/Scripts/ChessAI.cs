@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using static ChessInfo;
 using static ChessRules;
 
@@ -78,7 +77,7 @@ public class ChessAIDeep : ChessAI
 
     public static PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth)
     {
-        if (pieces.Count == 0 || depth < 0) return new PieceMove();
+        if (pieces.Count == 0 || depth <= 0) return new PieceMove();
         var validMoves = GetValidMovesByTurn(ref pieces, turn);
         if (validMoves.Count == 0) return new PieceMove();
         
@@ -94,6 +93,7 @@ public class ChessAIDeep : ChessAI
         validMoves = validMoves.OrderByDescending(move => move.score).Take(_maxMoves).ToList();
         // }
         // validMoves = validMoves.OrderByDescending(m => m.score).ToList().GetRange(0, MAX_MOVES);
+        
         foreach (var move in validMoves)
         {
             move.score += -1 * BestMoveDeep(move.simBoard, OtherColor(turn), depth - 1).score;
@@ -161,7 +161,7 @@ public class ChessAIRandom : ChessAI
     
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
-        if (pieces == null || moves == null || moves.Count == 0) return null;
+        if (pieces == null || moves == null || moves.Count == 0 || pieces.Count == 0) return null;
         return moves[0];
     }
 }
