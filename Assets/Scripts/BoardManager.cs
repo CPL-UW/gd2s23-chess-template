@@ -116,7 +116,7 @@ public class BoardManager : MonoBehaviour
         {
             "random" => new ChessAIRandom(),
             "simple" => new ChessAISimple(),
-            "deep" => new ChessAIDeep(),
+            "deep" => new ChessAIDeep(5,3),
             _ => _ai
         };
     }
@@ -124,7 +124,8 @@ public class BoardManager : MonoBehaviour
     private void UpdateText()
     {
         if (!_weAreLive) return;
-        topText.text = "";
+        var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
+        topText.text = $"{_turn}: {ChessAI.BoardScore(ref livePieces, _turn)}";
         bottomText.text = _ai.GetAIDescription();
     }
 

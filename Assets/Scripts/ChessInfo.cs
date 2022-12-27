@@ -35,6 +35,7 @@ public static class ChessInfo
         public readonly int y;
         public readonly IPieceData piece;
         public int score;
+        public List<IPieceData> simBoard = null;
 
         public PieceMove(IPieceData curPiece, int cx, int cy)
         {
@@ -55,21 +56,48 @@ public static class ChessInfo
         }
     }
     
-   public static string PieceListToString(IEnumerable<IPieceData> pieces)
+   public static string PieceListToString(List<IPieceData> pieces)
    {
-       return pieces.OrderByDescending(piece => piece.Y() * 100 + piece.X()).Aggregate("", (current, piece) => current + piece.LocID() + ":");
+       var output = "";
+       for (var y = 8; y >= 1; y--)
+       {
+           for (var x = 1; x <= 8; x++)
+           {
+               var piece = ChessRules.GetPieceAt(ref pieces, x, y);
+               if (null == piece) output += ".";
+               else
+               {
+                   var t = piece.PType() switch
+                   {
+                       PieceType.PAWN => "p",
+                       PieceType.KING => "k",
+                       PieceType.QUEEN => "q",
+                       PieceType.ROOK => "r",
+                       PieceType.BISHOP => "b",
+                       PieceType.KNIGHT => "n",
+                       _ => "."
+                   };
+                   if (piece.Color() == PieceColor.WHITE) t = t.ToUpper();
+                   output += t;
+               }
+           }
+           output += "\n";
+       }
+
+       return output;
+       // return pieces.OrderByDescending(piece => piece.Y() * 100 + piece.X()).Aggregate("", (current, piece) => current + piece.LocID() + ":");
    }
     
     public static readonly string [] PIECE_COLOR = {"white", "black"};
     public static readonly int BOARD_SIZE = 8;
-    public static readonly Dictionary<string, PieceType> PIECE_MAP = new() 
-        {
-            { "none", PieceType.NONE },
-            { "bishop", PieceType.BISHOP },
-            { "king", PieceType.KING },
-            { "knight", PieceType.KNIGHT },
-            { "pawn", PieceType.PAWN },
-            { "queen", PieceType.QUEEN },
-            { "rook", PieceType.ROOK }
-        };
+    // public static readonly Dictionary<string, PieceType> PIECE_MAP = new() 
+    //     {
+    //         { ".", PieceType.NONE },
+    //         { "b", PieceType.BISHOP },
+    //         { "K", PieceType.KING },
+    //         { "g", PieceType.KNIGHT },
+    //         { "p", PieceType.PAWN },
+    //         { "Q", PieceType.QUEEN },
+    //         { "r", PieceType.ROOK }
+    //     };
 }

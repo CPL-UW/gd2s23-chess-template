@@ -59,7 +59,7 @@ public static class ChessRules
             return true;
         }
 
-        Debug.Log($"Invalid M1P: {pieceToMove.PType()} ({pieceToMove.X()},{pieceToMove.Y()}) to ({pieceToMove.X() + dcx},{pieceToMove.Y() + dcy})");
+        Debug.Log($"Invalid M1P: {pieceToMove.PType()} ({pieceToMove.X()},{pieceToMove.Y()}) to ({pieceToMove.X() + dcx},{pieceToMove.Y() + dcy})\n{PieceListToString(pieces)}");
         return false;
     }
 
@@ -193,7 +193,9 @@ public static class ChessRules
         {
             for (var dy = -7; dy <= 7; dy++)
             {
-                if (CheckValidMove(ref pieces, pieceToMove, dx, dy))
+                if ((dx != 0 || dy != 0) &&
+                    ValidXY(dx + pieceToMove.X(), dy + pieceToMove.Y()) &&
+                    CheckValidMove(ref pieces, pieceToMove, dx, dy))
                 {
                     validMoves.Add(new PieceMove(pieceToMove, dx, dy));
                 }
@@ -203,10 +205,16 @@ public static class ChessRules
         return validMoves;
     }
 
+    // private static IEnumerable<PieceMove> GetValidMovesXY(ref List<IPieceData> pieces, int x, int y)
+    // {
+    //     var pieceToMove = GetPieceAt(ref pieces, x, y);
+    //     return null == pieceToMove ? new List<PieceMove>() : GetValidMoves(ref pieces, pieceToMove);
+    // }
+
     public static List<PieceMove> GetValidMovesByTurn(ref List<IPieceData> pieces, PieceColor turn)
     {
         var validMoves = new List<PieceMove>();
-        var turnPieces = pieces.Where(piece => piece.Color() == turn);
+        var turnPieces = pieces.Where(piece => piece.Color() == turn && piece.Alive());
         foreach (var piece in turnPieces)
         {
             validMoves.AddRange(GetValidMoves(ref pieces, piece));

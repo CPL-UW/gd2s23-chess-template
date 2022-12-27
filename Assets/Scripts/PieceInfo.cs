@@ -62,5 +62,6 @@ public class PieceInfo : IPieceData
     public void RemoveSelf()
     {
         _pieceState = PieceState.DEAD;
+        SetXY(-1,-1);
     }
 }
