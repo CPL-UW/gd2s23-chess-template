@@ -41,7 +41,7 @@ public static class ChessRules
 
     public static void MoveXY(ref List<IPieceData> pieces, int startX, int startY, int dcx, int dcy)
     {
-        MoveOnePiece(ref pieces, GetPieceAt(ref pieces, startX, startY), dcx, dcy);
+        MoveOnePiece(ref pieces, GetPieceAt(pieces, startX, startY), dcx, dcy);
     }
 
     public static bool MoveOnePiece(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
@@ -60,7 +60,7 @@ public static class ChessRules
         return false;
     }
 
-    public static IPieceData GetPieceAt(ref List<IPieceData> pieces, int x, int y)
+    public static IPieceData GetPieceAt(List<IPieceData> pieces, int x, int y)
     {
         return pieces.Find(piece => piece.X() == x && piece.Y() == y);
     }
@@ -81,14 +81,14 @@ public static class ChessRules
         if (0 == dcx && dcy == validYDir && !AnyPieceAt(ref pieces, pieceToMove.X(), pieceToMove.Y() + dcy))
             return true;
         if (1 != Mathf.Abs(dcx) || dcy != validYDir) return false;
-        var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
+        var targetPiece = GetPieceAt(pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return null != targetPiece && targetPiece.Color() != pieceToMove.Color();
     }
 
     private static bool RuleKing(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (Mathf.Abs(dcx) > 1 || Mathf.Abs(dcy) > 1) return false;
-        var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
+        var targetPiece = GetPieceAt(pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return !AnyPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy) ||
                targetPiece.Color() != pieceToMove.Color();
     }
@@ -118,7 +118,7 @@ public static class ChessRules
         }
         
         // if the way was clean, check the target
-        var targetPiece = GetPieceAt(ref pieces,pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
+        var targetPiece = GetPieceAt(pieces,pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return null == targetPiece || targetPiece.Color() != pieceToMove.Color();
     }
     
@@ -138,7 +138,7 @@ public static class ChessRules
         }
 
         // if the way was clean, check the target
-        var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
+        var targetPiece = GetPieceAt(pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return !AnyPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy) ||
                targetPiece.Color() != pieceToMove.Color();
     }
@@ -148,7 +148,7 @@ public static class ChessRules
         if ((Mathf.Abs(dcx) == 2 && Mathf.Abs(dcy) == 1) ||
             (Mathf.Abs(dcx) == 1 && Mathf.Abs(dcy) == 2))
         {
-            var targetPiece = GetPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
+            var targetPiece = GetPieceAt(pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
             if (!AnyPieceAt(ref pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy) ||
                 targetPiece.Color() != pieceToMove.Color())
                 return true;
@@ -172,9 +172,9 @@ public static class ChessRules
             _ => false
         };
     }
-    
-    
-    private static bool CheckValidMove(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
+
+
+    public static bool CheckValidMove(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         if (null == pieceToMove ||
             !ValidXY(pieceToMove.X(), pieceToMove.Y()) ||
@@ -183,7 +183,7 @@ public static class ChessRules
         return CheckPieceRules(ref pieces, pieceToMove, dcx, dcy);
     }
 
-    private static IEnumerable<PieceMove> GetValidMoves(ref List<IPieceData> pieces, IPieceData pieceToMove)
+    public static IEnumerable<PieceMove> GetValidMoves(ref List<IPieceData> pieces, IPieceData pieceToMove)
     {
         var validMoves = new List<PieceMove>();
         for (var dx = -7; dx <= 7; dx++)

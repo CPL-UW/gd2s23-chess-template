@@ -27,7 +27,7 @@ public class BoardManager : MonoBehaviour
     private ChessAI _ai;
     public TextMeshProUGUI topText;
     public TextMeshProUGUI bottomText;
-    
+    private Piece _movingPiece = null;
 
     private void GetPieceGridBounds()
     {
@@ -43,30 +43,42 @@ public class BoardManager : MonoBehaviour
     {
         return _xMin + (cx - 1) * _dx;
     }
-    
+
     // ReSharper disable once InconsistentNaming
     private float cy2ty(int cy)
     {
         return _yMin + (cy - 1) * _dy;
     }
-    
+
     private Vector3 PieceTargetPos(Piece piece)
     {
-        return new Vector3(cx2tx(piece.cx), cy2ty(piece.cy), 0);
+        return PieceTargetPosXY(piece.cx, piece.cy);
+        // return new Vector3(cx2tx(piece.cx), cy2ty(piece.cy), 0);
     }
-    
+
+    private Vector3 PieceTargetPosXY(int x, int y)
+    {
+        return new Vector3(cx2tx(x), cy2ty(y), 0);
+    }
+
     private float DistanceToTarget(Piece piece)
     {
         return Vector3.Distance(piece.transform.localPosition, PieceTargetPos(piece));
     }
-    
+
+    private void MoveAPieceToTarget(Piece piece, Vector3 target)
+    {
+        piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, target, 0.25f);
+    }
+
     private bool UpdatePieceLocations()
     {
         var moved = false;
-        
-        foreach( var piece in pieces.Where(piece => piece.Alive() && DistanceToTarget(piece) > TOLERANCE))
+
+        foreach (var piece in pieces.Where(piece => piece.Alive() && DistanceToTarget(piece) > TOLERANCE))
         {
-            piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, PieceTargetPos(piece), 0.25f);
+            MoveAPieceToTarget(piece, PieceTargetPos(piece));
+            // piece.transform.localPosition = Vector3.Lerp(piece.transform.localPosition, PieceTargetPos(piece), 0.25f);
             moved = true;
         }
 
@@ -75,11 +87,11 @@ public class BoardManager : MonoBehaviour
 
     private void DoAIBoardMove()
     {
-        
         _ai ??= new ChessAISimple();
-        var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
+
         if (_turn == PieceColor.BLACK)
         {
+            var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
             if (livePieces.Any(piece => piece.Color() == _turn))
             {
                 var bestMove = _ai.BestMove(ref livePieces, _turn);
@@ -89,6 +101,7 @@ public class BoardManager : MonoBehaviour
                         piece.X() == bestMove.piece.X() && piece.Y() == bestMove.piece.Y());
                     MoveOnePiece(ref livePieces, pieceToMove, bestMove.x, bestMove.y);
                 }
+
                 EndTurn();
             }
             else
@@ -107,7 +120,7 @@ public class BoardManager : MonoBehaviour
         {
             "random" => new ChessAIRandom(),
             "simple" => new ChessAISimple(),
-            "deep" => new ChessAIDeep(3,10),
+            "deep" => new ChessAIDeep(3, 10),
             _ => _ai
         };
         EndTurn();
@@ -116,9 +129,10 @@ public class BoardManager : MonoBehaviour
     private string TopText()
     {
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
-        return new[] {PieceColor.WHITE, PieceColor.BLACK}.Aggregate("", (current, turn) => current + $"{turn,6}:{ChessAI.BoardScore(ref livePieces, turn),-6:G}");
+        return new[] {PieceColor.WHITE, PieceColor.BLACK}.Aggregate("",
+            (current, turn) => current + $"{turn,6}:{ChessAI.BoardScore(ref livePieces, turn),-6:G}");
     }
-    
+
     private void UpdateText()
     {
         if (!_weAreLive) return;
@@ -133,8 +147,6 @@ public class BoardManager : MonoBehaviour
         _turn = OtherColor(_turn);
     }
 
-    
-    
 
     void FixedUpdate()
     {
@@ -155,11 +167,39 @@ public class BoardManager : MonoBehaviour
         return ValidXY(cx, cy) ? new Vector2Int(cx, cy) : new Vector2Int(0, 0);
     }
 
-    
+
     private void OnMouseDown()
     {
-       var mouseCxy = GetCxy();
-       Debug.Log($"Clicked on Board (cx={mouseCxy.x}, cy={mouseCxy.y})");
+        var mouseCxy = GetCxy();
+        if (_turn == PieceColor.WHITE)
+        {
+            if (null == _movingPiece)
+            {
+                var tp = pieces.FirstOrDefault(p => p.Alive() &&
+                                                    p.Color() == _turn &&
+                                                    p.X() == mouseCxy.x &&
+                                                    p.Y() == mouseCxy.y);
+                if (tp != null)
+                {
+                    _movingPiece = tp;
+                }
+            }
+            else
+            {
+                var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
+                var dcx = mouseCxy.x - _movingPiece.X();
+                var dcy = mouseCxy.y - _movingPiece.Y();
+                if (CheckValidMove(ref livePieces, _movingPiece, dcx, dcy))
+                {
+                    MoveOnePiece(ref livePieces, _movingPiece, dcx, dcy);
+                    EndTurn();
+                }
+                _movingPiece = null;
+                _weAreLive = true;
+            }
+        }
+
+        Debug.Log($"Clicked on Board (cx={mouseCxy.x}, cy={mouseCxy.y})");
     }
 
     // Update is called once per frame
@@ -170,12 +210,12 @@ public class BoardManager : MonoBehaviour
             GetPieceGridBounds();
             _screenWidth = Screen.width;
         }
-        
-        // if (Input.GetKeyUp(KeyCode.Space) || Input.GetMouseButtonUp(0))
-        // {
-        //     _weAreLive = true;
-        //     DoAIBoardMove();
-        //     // GetClickPosition();
-        // }
+
+        if (null != _movingPiece)
+        {
+            _weAreLive = false;
+            var mouseCxy = GetCxy();
+            MoveAPieceToTarget(_movingPiece, PieceTargetPosXY(mouseCxy.x, mouseCxy.y));
+        }
     }
 }

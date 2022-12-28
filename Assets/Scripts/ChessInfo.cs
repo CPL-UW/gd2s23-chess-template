@@ -63,7 +63,7 @@ public static class ChessInfo
        {
            for (var x = 1; x <= 8; x++)
            {
-               var piece = ChessRules.GetPieceAt(ref pieces, x, y);
+               var piece = ChessRules.GetPieceAt(pieces, x, y);
                if (null == piece) output += ".";
                else
                {
