@@ -53,7 +53,7 @@ public class ChessAIDeep : ChessAI
     private static int _maxMoves = 5;
     private static int _maxDepth = 3;
 
-    public ChessAIDeep(int maxMoves, int maxDepth)
+    public ChessAIDeep(int maxDepth, int maxMoves)
     {
         _maxMoves = maxMoves;
         _maxDepth = maxDepth;
@@ -67,7 +67,7 @@ public class ChessAIDeep : ChessAI
         return new Tuple<int, List<IPieceData>>(BoardScore(ref simBoard, turn), simBoard);
     }
 
-    public static PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth)
+    public static PieceMove BestMoveDeep(List<IPieceData> pieces, PieceColor turn, int depth, int width)
     {
         if (pieces.Count == 0 || depth <= 0) return new PieceMove();
         var validMoves = GetValidMovesByTurn(ref pieces, turn);
@@ -80,15 +80,11 @@ public class ChessAIDeep : ChessAI
             (move.score, move.simBoard) = SimulateMove(simBoard, turn, move.piece.X(), move.piece.Y(), move.x, move.y);
         }
         
-        // if (validMoves.Count > MAX_MOVES)
-        // {
-        validMoves = validMoves.OrderByDescending(move => move.score).Take(_maxMoves).ToList();
-        // }
-        // validMoves = validMoves.OrderByDescending(m => m.score).ToList().GetRange(0, MAX_MOVES);
+        validMoves = validMoves.OrderByDescending(move => move.score).Take(width).ToList();
         
         foreach (var move in validMoves)
         {
-            move.score += -1 * BestMoveDeep(move.simBoard, OtherColor(turn), depth - 1).score;
+            move.score += -1 * BestMoveDeep(move.simBoard, OtherColor(turn), depth - 1, width).score;
             move.simBoard = null;
         }
 
@@ -97,7 +93,7 @@ public class ChessAIDeep : ChessAI
 
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
-        return BestMoveDeep(pieces, turn, _maxDepth);
+        return BestMoveDeep(pieces, turn, _maxDepth, _maxMoves);
     }
 }
 
@@ -106,7 +102,7 @@ public class ChessAISimple : ChessAI
     public ChessAISimple() => aiName = "Simple AI";
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
-        return ChessAIDeep.BestMoveDeep(pieces, turn, 1);
+        return ChessAIDeep.BestMoveDeep(pieces, turn, 1, 1000);
     }
 }
 

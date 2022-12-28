@@ -72,7 +72,7 @@ public class BoardManager : MonoBehaviour
         return moved;
     }
 
-    private void DoRandomBoardMove()
+    private void DoAIBoardMove()
     {
         _ai ??= new ChessAISimple();
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
@@ -101,7 +101,7 @@ public class BoardManager : MonoBehaviour
         {
             "random" => new ChessAIRandom(),
             "simple" => new ChessAISimple(),
-            "deep" => new ChessAIDeep(10,3),
+            "deep" => new ChessAIDeep(3,10),
             _ => _ai
         };
     }
@@ -123,11 +123,7 @@ public class BoardManager : MonoBehaviour
     {
         UpdatePieceLocations();
         UpdateText();
-        _turn = _turn switch
-        {
-            PieceColor.WHITE => PieceColor.BLACK,
-            _ => PieceColor.WHITE
-        };
+        _turn = OtherColor(_turn);
     }
 
     
@@ -138,7 +134,7 @@ public class BoardManager : MonoBehaviour
         if (!_weAreLive) return;
         if (UpdatePieceLocations()) return;
         if (++_ticksSinceLastMove % ticksPerMove != 0) return;
-        DoRandomBoardMove();
+        DoAIBoardMove();
         _ticksSinceLastMove = 0;
     }
     
@@ -155,7 +151,7 @@ public class BoardManager : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space) || Input.GetMouseButtonUp(0))
         {
             _weAreLive = true;
-            DoRandomBoardMove();
+            DoAIBoardMove();
         }
     }
 }

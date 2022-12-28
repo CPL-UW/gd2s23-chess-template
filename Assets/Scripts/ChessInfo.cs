@@ -86,8 +86,4 @@ public static class ChessInfo
 
        return output;
    }
-    
-    public static readonly string [] PIECE_COLOR = {"white", "black"};
-    public static readonly int BOARD_SIZE = 8;
-   
 }
