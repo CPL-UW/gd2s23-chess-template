@@ -40,14 +40,6 @@ public abstract class ChessAI
     protected static List<IPieceData> SimBoardCopy(IEnumerable<IPieceData> pieces)
     {
         return pieces.Select(piece => new PieceInfo(piece)).Cast<IPieceData>().ToList();
-        // var newList = new List<PieceInfo>();
-        // foreach (var piece in pieces)
-        // {
-        //     var newPiece = new PieceInfo();
-        //     newPiece.CopyInfo(piece);
-        //     newList.Add(newPiece);
-        // }
-        // return newList.Cast<IPieceData>().ToList();
     }
 
     public PieceMove BestMove(ref List<IPieceData> pieces, PieceColor turn)
@@ -99,18 +91,6 @@ public class ChessAIDeep : ChessAI
             move.score += -1 * BestMoveDeep(move.simBoard, OtherColor(turn), depth - 1).score;
             move.simBoard = null;
         }
-        
-        
-        // if (depth > 1 && MoveXY(ref simBoard, move.piece.X(), move.piece.Y(), move.x, move.y))
-            // {
-            //     var deepMove = BestMoveDeep(simBoard, OtherColor(turn), depth - 1);
-            //     move.score = -1 * deepMove?.score ?? BoardScore(ref pieces, turn);
-            // }
-            // else
-            // {
-            //     move.score = BoardScore(ref pieces, turn);
-            // }
-        // }
 
         return validMoves.OrderByDescending(m => m.score).FirstOrDefault();
     }
@@ -127,31 +107,6 @@ public class ChessAISimple : ChessAI
     protected override PieceMove BestScoredMove(ref List<IPieceData> pieces, List<PieceMove> moves, PieceColor turn)
     {
         return ChessAIDeep.BestMoveDeep(pieces, turn, 1);
-        // if (pieces == null || moves == null || moves.Count == 0) return null;
-        // var scores = "";
-        // var lastScore = -1;
-        // PieceMove bestMove = null;
-        // foreach (var move in moves)
-        // {
-        //     var futurePieces = SimBoardCopy(pieces);
-        //     var pieceToMove = GetPieceAt(ref futurePieces, move.piece.X(), move.piece.Y());
-        //     MoveOnePiece(ref futurePieces, pieceToMove, move.x, move.y);
-        //     var curScore = BoardScore(ref futurePieces, turn);
-        //     if (lastScore != curScore)
-        //     {
-        //         scores += $"{curScore} ";
-        //         lastScore = curScore;
-        //     }
-        //
-        //     if (null == bestMove || curScore >= bestMove.score)
-        //     {
-        //         bestMove = move;
-        //         bestMove.score = curScore;
-        //     }
-        // }
-        //
-        // // Debug.Log($"SCORES (out of {moves.Count}): {scores}");
-        // return bestMove;
     }
 }
 

@@ -10,11 +10,9 @@ using static ChessInfo;
 public class BoardManager : MonoBehaviour
 {
     public List<Piece> pieces;
-    // public List<Piece> p2Pieces;
 
     private float _screenWidth;
     private const float TOLERANCE = 0.01f;
-    // private Rect _pieceBounds = Rect.zero;
     private float _xMax;
     private float _yMax;
     private float _xMin;
@@ -32,21 +30,8 @@ public class BoardManager : MonoBehaviour
 
     private void GetPieceGridBounds()
     {
-        // Debug.Log($"parent.localScale: {pieces.ElementAt(0).transform.parent.localScale}; localPosition: {pieces.ElementAt(0).transform.localPosition}");
-        
         _xMax = _yMax = 0.77f;
         _yMin = _xMin = -0.77f;
-        // TODO pretty effing brittle!
-        
-        
-        // foreach (var pos in pieces.Select(piece => piece.transform.localPosition))
-        // {
-        //     if (pos.x > _xMax) _xMax = pos.x;
-        //     if (pos.x < _xMin) _xMin = pos.x;
-        //     if (pos.y > _yMax) _yMax = pos.y;
-        //     if (pos.y < _yMin) _yMin = pos.y;
-        // }
-
         _dx = (_xMax - _xMin) / 7;
         _dy = (_yMax - _yMin) / 7;
         Debug.Log($"BOUNDS_UPDATE: {_xMin}=>{_xMax} dx={_dx}");
@@ -121,11 +106,16 @@ public class BoardManager : MonoBehaviour
         };
     }
 
+    private string TopText()
+    {
+        var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
+        return new[] {PieceColor.WHITE, PieceColor.BLACK}.Aggregate("", (current, turn) => current + $"{turn,6}:{ChessAI.BoardScore(ref livePieces, turn),-6:G}");
+    }
+    
     private void UpdateText()
     {
         if (!_weAreLive) return;
-        var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
-        topText.text = $"{_turn}: {ChessAI.BoardScore(ref livePieces, _turn)}";
+        topText.text = TopText();
         bottomText.text = _ai.GetAIDescription();
     }
 
@@ -149,7 +139,6 @@ public class BoardManager : MonoBehaviour
         if (UpdatePieceLocations()) return;
         if (++_ticksSinceLastMove % ticksPerMove != 0) return;
         DoRandomBoardMove();
-        // CheckDuplicates();
         _ticksSinceLastMove = 0;
     }
     

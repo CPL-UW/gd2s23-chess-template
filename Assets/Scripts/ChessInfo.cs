@@ -85,19 +85,9 @@ public static class ChessInfo
        }
 
        return output;
-       // return pieces.OrderByDescending(piece => piece.Y() * 100 + piece.X()).Aggregate("", (current, piece) => current + piece.LocID() + ":");
    }
     
     public static readonly string [] PIECE_COLOR = {"white", "black"};
     public static readonly int BOARD_SIZE = 8;
-    // public static readonly Dictionary<string, PieceType> PIECE_MAP = new() 
-    //     {
-    //         { ".", PieceType.NONE },
-    //         { "b", PieceType.BISHOP },
-    //         { "K", PieceType.KING },
-    //         { "g", PieceType.KNIGHT },
-    //         { "p", PieceType.PAWN },
-    //         { "Q", PieceType.QUEEN },
-    //         { "r", PieceType.ROOK }
-    //     };
+   
 }

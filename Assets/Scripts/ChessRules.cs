@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,9 +5,7 @@ using static ChessInfo;
 
 public static class ChessRules
 {
-    
-
-    public static bool ValidXY(int x, int y)
+    private static bool ValidXY(int x, int y)
     {
         return x is >= 1 and <= 8 && y is >= 1 and <= 8;
     }
@@ -42,9 +39,9 @@ public static class ChessRules
         return true;
     }
 
-    public static bool MoveXY(ref List<IPieceData> pieces, int startX, int startY, int dcx, int dcy)
+    public static void MoveXY(ref List<IPieceData> pieces, int startX, int startY, int dcx, int dcy)
     {
-        return MoveOnePiece(ref pieces, GetPieceAt(ref pieces, startX, startY), dcx, dcy);
+        MoveOnePiece(ref pieces, GetPieceAt(ref pieces, startX, startY), dcx, dcy);
     }
 
     public static bool MoveOnePiece(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
@@ -204,12 +201,6 @@ public static class ChessRules
 
         return validMoves;
     }
-
-    // private static IEnumerable<PieceMove> GetValidMovesXY(ref List<IPieceData> pieces, int x, int y)
-    // {
-    //     var pieceToMove = GetPieceAt(ref pieces, x, y);
-    //     return null == pieceToMove ? new List<PieceMove>() : GetValidMoves(ref pieces, pieceToMove);
-    // }
 
     public static List<PieceMove> GetValidMovesByTurn(ref List<IPieceData> pieces, PieceColor turn)
     {
