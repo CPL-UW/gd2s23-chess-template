@@ -139,6 +139,14 @@ public class BoardManager : MonoBehaviour
         _ticksSinceLastMove = 0;
     }
     
+    void OnMouseDown()
+    {
+        var mousePos = Input.mousePosition - transform.position;
+        var worldPos = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(mousePos));
+        var cx = (int) Math.Floor(worldPos.x / .22) + 5;
+        var cy = (int) Math.Floor(worldPos.y / .22) + 5;
+        Debug.Log($"Clicked on Board {worldPos} (cx={cx}, cy={cy})");
+    }
 
     // Update is called once per frame
     void Update()
