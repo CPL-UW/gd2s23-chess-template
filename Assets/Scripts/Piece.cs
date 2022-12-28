@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using static ChessInfo;
 
@@ -102,6 +103,11 @@ public class Piece :  MonoBehaviour, IPieceData
     private void Show()
     {
         GetComponent<SpriteRenderer>().enabled = true;
+    }
+
+    void OnMouseDown()
+    {
+        Debug.Log("Clicked on " + pieceType + " " + pieceColor);
     }
     
     void Start()
