@@ -75,29 +75,34 @@ public class BoardManager : MonoBehaviour
 
     private void DoAIBoardMove()
     {
+        
         _ai ??= new ChessAISimple();
         var livePieces = pieces.Cast<IPieceData>().Where(piece => piece.Alive()).ToList();
-        if (livePieces.Any(piece => piece.Color() == _turn))
+        if (_turn == PieceColor.BLACK)
         {
-            var bestMove = _ai.BestMove(ref livePieces, _turn);
-            if (bestMove != null && bestMove.NotZero())
+            if (livePieces.Any(piece => piece.Color() == _turn))
             {
-                var pieceToMove = pieces.FirstOrDefault(piece => piece.X() == bestMove.piece.X() && piece.Y() == bestMove.piece.Y());
-                MoveOnePiece(ref livePieces, pieceToMove, bestMove.x, bestMove.y);
+                var bestMove = _ai.BestMove(ref livePieces, _turn);
+                if (bestMove != null && bestMove.NotZero())
+                {
+                    var pieceToMove = pieces.FirstOrDefault(piece =>
+                        piece.X() == bestMove.piece.X() && piece.Y() == bestMove.piece.Y());
+                    MoveOnePiece(ref livePieces, pieceToMove, bestMove.x, bestMove.y);
+                }
+                EndTurn();
+            }
+            else
+            {
+                Debug.Log($"No pieces!");
+                Debug.Break();
             }
         }
-        else
-        {
-            Debug.Log($"No pieces!");
-            Debug.Break();
-        }
-
-        EndTurn();
     }
 
     public void OnClick(string buttonName)
     {
         Debug.Log($"BoardManager.OnClick: {buttonName}");
+        _weAreLive = true;
         _ai = buttonName switch
         {
             "random" => new ChessAIRandom(),
@@ -105,6 +110,7 @@ public class BoardManager : MonoBehaviour
             "deep" => new ChessAIDeep(3,10),
             _ => _ai
         };
+        EndTurn();
     }
 
     private string TopText()
@@ -138,14 +144,22 @@ public class BoardManager : MonoBehaviour
         DoAIBoardMove();
         _ticksSinceLastMove = 0;
     }
-    
-    void OnMouseDown()
+
+    Vector2Int GetCxy()
     {
+        if (null == Camera.main) return new Vector2Int(0, 0);
         var mousePos = Input.mousePosition - transform.position;
         var worldPos = transform.InverseTransformPoint(Camera.main.ScreenToWorldPoint(mousePos));
         var cx = (int) Math.Floor(worldPos.x / .22) + 5;
         var cy = (int) Math.Floor(worldPos.y / .22) + 5;
-        Debug.Log($"Clicked on Board {worldPos} (cx={cx}, cy={cy})");
+        return ValidXY(cx, cy) ? new Vector2Int(cx, cy) : new Vector2Int(0, 0);
+    }
+
+    
+    private void OnMouseDown()
+    {
+       var mouseCxy = GetCxy();
+       Debug.Log($"Clicked on Board (cx={mouseCxy.x}, cy={mouseCxy.y})");
     }
 
     // Update is called once per frame
@@ -157,11 +171,11 @@ public class BoardManager : MonoBehaviour
             _screenWidth = Screen.width;
         }
         
-        if (Input.GetKeyUp(KeyCode.Space) || Input.GetMouseButtonUp(0))
-        {
-            _weAreLive = true;
-            DoAIBoardMove();
-            // GetClickPosition();
-        }
+        // if (Input.GetKeyUp(KeyCode.Space) || Input.GetMouseButtonUp(0))
+        // {
+        //     _weAreLive = true;
+        //     DoAIBoardMove();
+        //     // GetClickPosition();
+        // }
     }
 }

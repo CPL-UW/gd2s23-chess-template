@@ -5,7 +5,7 @@ using static ChessInfo;
 
 public static class ChessRules
 {
-    private static bool ValidXY(int x, int y)
+    public static bool ValidXY(int x, int y)
     {
         return x is >= 1 and <= 8 && y is >= 1 and <= 8;
     }
