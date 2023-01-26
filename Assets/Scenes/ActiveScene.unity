@@ -1907,9 +1907,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Random AI
-
-'
+  m_text: Restart
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ab76f69974707404d8d223d8f9a36a74, type: 2}
   m_sharedMaterial: {fileID: -4436891224302357106, guid: ab76f69974707404d8d223d8f9a36a74, type: 2}
@@ -3552,6 +3550,7 @@ MonoBehaviour:
   ticksPerMove: 10
   topText: {fileID: 210947343}
   bottomText: {fileID: 998592406}
+  prefabPiece: {fileID: 4784918024393307504, guid: b75fb2e9e7fc14067bd65b1c91a5c981, type: 3}
 --- !u!224 &1106519383
 RectTransform:
   m_ObjectHideFlags: 0

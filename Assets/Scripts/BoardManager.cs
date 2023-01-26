@@ -28,6 +28,7 @@ public class BoardManager : MonoBehaviour
     public TextMeshProUGUI topText;
     public TextMeshProUGUI bottomText;
     private Piece _movingPiece = null;
+    public GameObject prefabPiece;
 
     private void GetPieceGridBounds()
     {
@@ -74,7 +75,7 @@ public class BoardManager : MonoBehaviour
     private bool UpdatePieceLocations()
     {
         var moved = false;
-
+        if (pieces == null) return false;
         foreach (var piece in pieces.Where(piece => piece.Alive() && DistanceToTarget(piece) > TOLERANCE))
         {
             MoveAPieceToTarget(piece, PieceTargetPos(piece));
@@ -112,18 +113,45 @@ public class BoardManager : MonoBehaviour
         }
     }
 
+    private void KillAndRestartBoard()
+    {
+        if (pieces != null)
+        {
+            foreach (var piece in pieces)
+            {
+                Destroy(piece.gameObject);
+            }
+            pieces = null;
+            _weAreLive = false;
+        } 
+        pieces = new List<Piece>();
+        var pieceInfoList = DefaultBoard();
+        foreach (var pieceInfo in pieceInfoList)
+        {
+            var pieceObject = Instantiate(prefabPiece, transform);
+            var piece = pieceObject.GetComponent<Piece>();
+            piece.CopyInfo(pieceInfo);
+            pieces.Add(piece);
+        }
+        _turn = PieceColor.WHITE;
+        _weAreLive = true;
+    
+    }
+
     public void OnClick(string buttonName)
     {
         Debug.Log($"BoardManager.OnClick: {buttonName}");
         _weAreLive = true;
         _ai = buttonName switch
         {
-            "random" => new ChessAIRandom(),
+            // "random" => new ChessAIRandom(),
             "simple" => new ChessAISimple(),
             "deep" => new ChessAIDeep(3, 10),
             _ => _ai
         };
-        EndTurn();
+        if (buttonName == "random")
+            KillAndRestartBoard();
+        else EndTurn();
     }
 
     private string TopText()
@@ -137,7 +165,8 @@ public class BoardManager : MonoBehaviour
     {
         if (!_weAreLive) return;
         topText.text = TopText();
-        bottomText.text = _ai.GetAIDescription();
+        if (null != _ai)
+            bottomText.text = _ai.GetAIDescription();
     }
 
     private void EndTurn()

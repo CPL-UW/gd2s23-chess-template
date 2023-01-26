@@ -104,6 +104,19 @@ MonoBehaviour:
   cx: 0
   cy: 0
   pieceID: 0
+  sprites:
+  - {fileID: 21300000, guid: fd429daaf72754feb9dc30fb0ca571a0, type: 3}
+  - {fileID: 21300000, guid: 3b2ce773d4e1b4121bf17936235bfb5d, type: 3}
+  - {fileID: 21300000, guid: cca2e90cf969844c8a46618d11a67950, type: 3}
+  - {fileID: 21300000, guid: 73b70fdf96d564c1688ebd7d83ab31cd, type: 3}
+  - {fileID: 21300000, guid: 4aaaa9e8d0140406f941ff1f9037b63b, type: 3}
+  - {fileID: 21300000, guid: 13fa29e31bf37453f896fc9e85bd09e7, type: 3}
+  - {fileID: 21300000, guid: 1c91cc1a329e9413ab0bde4b87868859, type: 3}
+  - {fileID: 21300000, guid: 9a1a5f77f1dd0427a9a8f16e99958edf, type: 3}
+  - {fileID: 21300000, guid: 970f6ec58db1049b4b6c38aaaca05df2, type: 3}
+  - {fileID: 21300000, guid: bdb2625a4b4ac4cf18310f33176ce4b5, type: 3}
+  - {fileID: 21300000, guid: f9a7140a4c0024854a824576ee877001, type: 3}
+  - {fileID: 21300000, guid: e6b1be205dfb742649d3f6aea5ed66ea, type: 3}
 --- !u!61 &2780703277812084245
 BoxCollider2D:
   m_ObjectHideFlags: 0

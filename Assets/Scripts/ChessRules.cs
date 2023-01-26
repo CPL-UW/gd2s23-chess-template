@@ -78,8 +78,14 @@ public static class ChessRules
     private static bool RulePawn(ref List<IPieceData> pieces, IPieceData pieceToMove, int dcx, int dcy)
     {
         var validYDir = pieceToMove.Color() == PieceColor.WHITE ? 1 : -1;
-        if (0 == dcx && dcy == validYDir && !AnyPieceAt(ref pieces, pieceToMove.X(), pieceToMove.Y() + dcy))
-            return true;
+        if (0 == dcx)
+        {
+            if ((dcy == validYDir || 
+                (dcy == 2 * validYDir && pieceToMove.Y() == (pieceToMove.Color() == PieceColor.WHITE ? 2 : 7))) &&
+                !AnyPieceAt(ref pieces, pieceToMove.X(), pieceToMove.Y() + dcy))
+                return true;
+        }
+
         if (1 != Mathf.Abs(dcx) || dcy != validYDir) return false;
         var targetPiece = GetPieceAt(pieces, pieceToMove.X() + dcx, pieceToMove.Y() + dcy);
         return null != targetPiece && targetPiece.Color() != pieceToMove.Color();

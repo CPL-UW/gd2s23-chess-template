@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using static ChessInfo;
@@ -29,8 +30,12 @@ public class PieceInfo : IPieceData
         CopyInfo(pieceData);
     }
 
-    public PieceInfo()
+    public PieceInfo(PieceType type, PieceColor color, int cx, int cy)
     {
+        _pieceType = type;
+        _pieceColor = color;
+        _cx = cx;
+        _cy = cy;
     }
 
     public void CopyInfo(IPieceData other)
@@ -69,6 +74,7 @@ public class Piece :  MonoBehaviour, IPieceData
     public int cx;
     public int cy;
     public int pieceID;
+    public Sprite[] sprites;
     
     private Piece()
     {
@@ -87,6 +93,14 @@ public class Piece :  MonoBehaviour, IPieceData
         return pieceID;
     }
 
+    public void CopyInfo(IPieceData other)
+    {
+        pieceType = other.PType();
+        pieceColor = other.Color();
+        cx = other.X();
+        cy = other.Y();
+    }
+    
     public void RemoveSelf()
     {
         if (pieceState != PieceState.ALIVE) return;
@@ -102,7 +116,16 @@ public class Piece :  MonoBehaviour, IPieceData
 
     private void Show()
     {
-        GetComponent<SpriteRenderer>().enabled = true;
+        var sr = GetComponent<SpriteRenderer>();
+        var spriteName = $"{pieceColor.ToString().ToLower()}_{pieceType.ToString().ToLower()}";
+        var sprite = sprites.FirstOrDefault(s => s.name == spriteName);
+        if (sprite == null)
+        {
+            Debug.LogError($"Sprite not found: {spriteName}");
+            return;
+        }
+        sr.sprite = sprite;
+        sr.enabled = true;
     }
 
     void OnMouseDown()

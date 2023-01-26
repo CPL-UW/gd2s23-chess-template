@@ -86,4 +86,49 @@ public static class ChessInfo
 
        return output;
    }
+   
+    public static List<IPieceData> StringToPieceInfoList(string input)
+    {
+         var pieces = new List<IPieceData>();
+         var lines = input.Split('\n');
+         if (lines.Length != 8)
+         {
+             Debug.Log($"Invalid input string [len={lines.Length}]:" + input);
+             return pieces;
+         }
+         for (var y = 8; y >= 1; y--)
+         {
+              var line = lines[8 - y];
+              for (var x = 1; x <= 8; x++)
+              {
+                var c = line[x - 1];
+                
+                var p = c switch
+                {
+                     'p' => new PieceInfo(PieceType.PAWN, PieceColor.BLACK, x, y),
+                     'P' => new PieceInfo(PieceType.PAWN, PieceColor.WHITE, x, y),
+                     'k' => new PieceInfo(PieceType.KING, PieceColor.BLACK, x, y),
+                     'K' => new PieceInfo(PieceType.KING, PieceColor.WHITE, x, y),
+                     'q' => new PieceInfo(PieceType.QUEEN, PieceColor.BLACK, x, y),
+                     'Q' => new PieceInfo(PieceType.QUEEN, PieceColor.WHITE, x, y),
+                     'r' => new PieceInfo(PieceType.ROOK, PieceColor.BLACK, x, y),
+                     'R' => new PieceInfo(PieceType.ROOK, PieceColor.WHITE, x, y),
+                     'b' => new PieceInfo(PieceType.BISHOP, PieceColor.BLACK, x, y),
+                     'B' => new PieceInfo(PieceType.BISHOP, PieceColor.WHITE, x, y),
+                     'n' => new PieceInfo(PieceType.KNIGHT, PieceColor.BLACK, x, y),
+                     'N' => new PieceInfo(PieceType.KNIGHT, PieceColor.WHITE, x, y),
+                     _ => null
+                };
+                if (null != p) pieces.Add(p);
+              }
+         }
+         return pieces;
+    }
+    
+    private static string _defaultBoard = "rnbqkbnr\npppppppp\n........\n........\n........\n........\nPPPPPPPP\nRNBQKBNR";
+    public static List<IPieceData> DefaultBoard()
+    {
+        return StringToPieceInfoList(_defaultBoard);
+    }
+
 }
